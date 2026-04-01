@@ -253,16 +253,19 @@ export function AIConsultant() {
     // 1. Get Key (Check URL param first for debugging, then Env Var)
     const urlParams = new URLSearchParams(window.location.search);
     const urlKey = urlParams.get('key');
-    const apiKey = urlKey || process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+    const storageKey = typeof window !== 'undefined' ? localStorage.getItem('GEMINI_API_KEY_OVERRIDE') : null;
+    const apiKey = urlKey || storageKey || process.env.NEXT_PUBLIC_GEMINI_API_KEY;
 
-    if (!apiKey || apiKey === "undefined" || apiKey === "null") {
+    if (!apiKey || apiKey === "undefined" || apiKey === "null" || apiKey.length < 10) {
       addDebug("API Key Missing (Client-side)");
-      setPermissionErrorMessage("API Key bulunamadı. Vercel'de NEXT_PUBLIC_GEMINI_API_KEY değişkenini ayarladığınızdan ve yeni bir build aldığınızdan emin olun.");
+      setPermissionErrorMessage("API Key bulunamadı. Vercel Ayarlarından NEXT_PUBLIC_GEMINI_API_KEY değişkenini ekleyin veya aşağıdaki butona tıklayarak geçici olarak yapıştırın.");
       setShowPermissionError(true);
       audioStream.getTracks().forEach(t => t.stop());
       setIsConnecting(false);
       return;
     }
+
+    addDebug(`API Key Check: ${apiKey.substring(0, 6)}...`);
 
     try {
       const audioContext = getAudioContext();
@@ -352,7 +355,24 @@ export function AIConsultant() {
               <button onClick={() => { setIsWelcomeVisible(false); toggleLive(); }} className="bg-[#e63946] text-white px-10 py-5 rounded-full text-xl font-bold flex items-center gap-3 mx-auto hover:bg-red-700 transition-colors shadow-2xl">
                 {isConnecting ? t.btnConnecting : t.welcomeBtn} <ArrowRight className="w-6 h-6" />
               </button>
-              {showPermissionError && (<p className="text-red-400 mt-4 text-sm">{permissionErrorMessage}</p>)}
+              
+              {showPermissionError && (
+                <div className="mt-6 p-4 bg-red-500/20 rounded-xl border border-red-500/30">
+                  <p className="text-red-200 text-sm mb-4">{permissionErrorMessage}</p>
+                  <button 
+                    onClick={() => {
+                      const k = prompt("Gemini API Key yapıştırın:");
+                      if (k && k.startsWith("AIza")) {
+                        localStorage.setItem('GEMINI_API_KEY_OVERRIDE', k);
+                        window.location.reload();
+                      }
+                    }}
+                    className="text-xs bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg transition-colors border border-white/20"
+                  >
+                    API Anahtarını El ile Ayarla
+                  </button>
+                </div>
+              )}
             </div>
           </motion.div>
         )}
