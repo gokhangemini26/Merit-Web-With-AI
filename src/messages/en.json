@@ -1,0 +1,52 @@
+{
+  "nav": {
+    "about": "About Us",
+    "process": "Process",
+    "products": "Products",
+    "clients": "Clients",
+    "social": "Social Responsibility",
+    "contact": "Contact"
+  },
+  "home": {
+    "title": "ABOUT US",
+    "desc1": "We are an Istanbul-based jersey and ready-to-wear manufacturer specializing in high-quality and exclusive garments. With over 30 years of experience in the textile industry, we are committed to operating at the highest standards and continuously bringing the latest fabric innovations and industrial trends to our clients.",
+    "desc2": "Our team of highly skilled professionals is dedicated to meeting the day-to-day challenges of the industry with passion and expertise. At Merit, we strongly believe in the power of teamwork. We take pride in being actively involved in every project we undertake, ensuring excellence at every stage of production.",
+    "cta": "Get in touch now!"
+  },
+  "products": {
+    "title": "PRODUCTS",
+    "desc": "We have unique access to a selection of highly specialized manufacturers of fabrics and materials. We combine these highly specialized materials to produce the highest quality polo shirts, t-shirts, sweatshirts, and hoodies. You can see some of the products we've made below.",
+    "badges": {
+      "organic": "🌿 ORGANIC COTTON",
+      "wool": "✨ PREMIUM WOOL",
+      "slim": "👔 SLIM FIT"
+    }
+  },
+  "process": {
+    "title": "PRODUCTION PROCESS",
+    "desc": "Our garment production process is meticulously managed from the design stage to shipment.",
+    "steps": {
+      "design": "Design & Development",
+      "sourcing": "Fabric Sourcing",
+      "cutting": "Cutting & Sewing",
+      "quality": "Quality Control",
+      "logistics": "Logistics"
+    },
+    "desc_sourcing": "Fabrics are carefully sourced to match your specific requirements in composition, performance, and texture. We also offer custom dyeing to meet your exact color specifications, along with additional finishing treatments to enhance softness and overall quality.",
+    "desc_design": "For each order, we develop a prototype for your approval, giving you the opportunity to test and refine the functionality and fit of your design. Once the samples are approved, we proceed with bulk production, ensuring consistency and quality at every stage.",
+    "desc_manufacturing": "Bulk production takes place on our dedicated production lines, where all items are manufactured to order and carefully monitored throughout each stage. Additional quality inspections are carried out during the finishing process, ensuring every product meets our standards before being carefully packaged for delivery."
+  },
+  "consultant": {
+    "btnChat": "Talk to Consultant",
+    "btnEnd": "End Session",
+    "btnConnecting": "Connecting...",
+    "welcomeTitle": "Merit Textile",
+    "welcomeSubtitle": "AI Consultant",
+    "welcomeDesc": "Are you ready to explore the world of Merit Textile with our AI consultant?",
+    "welcomeBtn": "Start Session",
+    "greeting": "Hello, welcome to Merit Textile. I would be happy to help you.",
+    "aiRole": "You are Merit Textile's AI consultant. You provide information about textile production, ready-to-wear, sustainability, and global operations.",
+    "indicatorNavigating": "Navigating to",
+    "indicatorShowing": "showing"
+  }
+}

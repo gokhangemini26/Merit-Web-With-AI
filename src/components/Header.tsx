@@ -1,19 +1,20 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-
-const navItems = [
-  { label: "About Us", href: "/" },
-  { label: "Process", href: "/process" },
-  { label: "Products", href: "/products" },
-  { label: "Clients", href: "/clients" },
-  { label: "Social Responsibility", href: "/social-responsibility" },
-  { label: "Contact", href: "/contact" },
-];
+import { useTranslations } from "next-intl";
+import { Link, usePathname } from "@/i18n/routing";
 
 export function Header() {
+  const t = useTranslations("nav");
   const pathname = usePathname();
+
+  const navItems = [
+    { label: t("about"), href: "/" },
+    { label: t("process"), href: "/process" },
+    { label: t("products"), href: "/products" },
+    { label: t("clients"), href: "/clients" },
+    { label: t("social"), href: "/social-responsibility" },
+    { label: t("contact"), href: "/contact" },
+  ];
 
   return (
     <header

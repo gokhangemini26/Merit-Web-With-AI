@@ -1,30 +1,37 @@
-import React from "react";
-import { PageTitle } from "@/components/PageTitle";
+"use client";
 
-const cards = [
-  {
-    icon: "/images/process/fabric-icon.png",
-    title: "FABRIC SOURCING",
-    description:
-      "Fabrics are carefully sourced to match your specific requirements in composition, performance, and texture. We also offer custom dyeing to meet your exact color specifications, along with additional finishing treatments to enhance softness and overall quality.",
-  },
-  {
-    icon: "/images/process/design-icon.png",
-    title: "PROTOTYPES & SAMPLING",
-    description:
-      "For each order, we develop a prototype for your approval, giving you the opportunity to test and refine the functionality and fit of your design. Once the samples are approved, we proceed with bulk production, ensuring consistency and quality at every stage.",
-  },
-  {
-    icon: "/images/process/tshirt-icon.png",
-    title: "BULK MANUFACTURE",
-    description:
-      "Bulk production takes place on our dedicated production lines, where all items are manufactured to order and carefully monitored throughout each stage. Additional quality inspections are carried out during the finishing process, ensuring every product meets our standards before being carefully packaged for delivery.",
-  },
-];
+import React from "react";
+import { useTranslations } from "next-intl";
+import { PageTitle } from "@/components/PageTitle";
+import { useSpotlight } from "@/components/SpotlightProvider";
 
 export function ProcessSection() {
+  const t = useTranslations("process");
+  const { highlightId } = useSpotlight();
+  const isHighlighted = highlightId === "process";
+
+  const cards = [
+    {
+      icon: "/images/process/fabric-icon.png",
+      title: t("steps.sourcing"),
+      description: t("desc_sourcing"),
+    },
+    {
+      icon: "/images/process/design-icon.png",
+      title: t("steps.design"),
+      description: t("desc_design"),
+    },
+    {
+      icon: "/images/process/tshirt-icon.png",
+      title: t("steps.cutting"),
+      description: t("desc_manufacturing"),
+    },
+  ];
+
   return (
     <section
+      id="process"
+      className={isHighlighted ? "relative z-[90] transition-all duration-500" : ""}
       style={{
         maxWidth: 960,
         margin: "0 auto",
@@ -40,7 +47,7 @@ export function ProcessSection() {
           .process-arrow { display: none; }
         }
       `}</style>
-      <PageTitle title="PROCESS" />
+      <PageTitle title={t("title")} />
       <p
         style={{
           fontSize: 18,
@@ -53,9 +60,7 @@ export function ProcessSection() {
           fontFamily: "var(--font-poppins), Poppins, Arial, sans-serif",
         }}
       >
-        The production process at Merit consists of several carefully managed
-        stages, each designed to ensure the highest standards of quality and
-        efficiency.
+        {t("desc")}
       </p>
       <div
         className="process-cards-row"

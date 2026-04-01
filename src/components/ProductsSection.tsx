@@ -2,41 +2,49 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/routing";
 import { PageTitle } from "@/components/PageTitle";
-
-const slides = [
-  {
-    brand: "AXEL ARIGATO",
-    badge: "🌿 ORGANIC COTTON",
-    imageSrc: "/images/clients/axel-arigato.png",
-    imageAlt: "Axel Arigato product",
-  },
-  {
-    brand: "ERMENEGILDO ZEGNA",
-    badge: "✨ PREMIUM WOOL",
-    imageSrc: "/images/clients/ermenegildo-zegna.png",
-    imageAlt: "Ermenegildo Zegna product",
-  },
-  {
-    brand: "HACKETT LONDON",
-    badge: "👔 SLIM FIT",
-    imageSrc: "/images/clients/hackett.png",
-    imageAlt: "Hackett London product",
-  },
-];
+import { useSpotlight } from "@/components/SpotlightProvider";
 
 export function ProductsSection() {
+  const t = useTranslations("products");
+  const { highlightId } = useSpotlight();
   const [current, setCurrent] = useState(0);
   const [prevHover, setPrevHover] = useState(false);
   const [nextHover, setNextHover] = useState(false);
+  const isHighlighted = highlightId === "products";
 
-  const prev = () => setCurrent((i) => (i === 0 ? slides.length - 1 : i - 1));
-  const next = () => setCurrent((i) => (i === slides.length - 1 ? 0 : i + 1));
+  const slides = [
+    {
+      brand: "AXEL ARIGATO",
+      badge: t("badges.organic"),
+      imageSrc: "/images/clients/axel-arigato.png",
+      imageAlt: "Axel Arigato product",
+    },
+    {
+      brand: "ERMENEGILDO ZEGNA",
+      badge: t("badges.wool"),
+      imageSrc: "/images/clients/ermenegildo-zegna.png",
+      imageAlt: "Ermenegildo Zegna product",
+    },
+    {
+      brand: "HACKETT LONDON",
+      badge: t("badges.slim"),
+      imageSrc: "/images/clients/hackett.png",
+      imageAlt: "Hackett London product",
+    },
+  ];
+
+  const prev = () => setCurrent((i: number) => (i === 0 ? slides.length - 1 : i - 1));
+  const next = () => setCurrent((i: number) => (i === slides.length - 1 ? 0 : i + 1));
 
   const slide = slides[current];
 
   return (
     <section
+      id="products"
+      className={isHighlighted ? "relative z-[90] transition-all duration-500" : ""}
       style={{
         maxWidth: 570,
         margin: "0 auto",
@@ -46,7 +54,7 @@ export function ProductsSection() {
         alignItems: "center",
       }}
     >
-      <PageTitle title="PRODUCTS" />
+      <PageTitle title={t("title")} />
       <p
         style={{
           fontSize: 18,
@@ -58,10 +66,7 @@ export function ProductsSection() {
           maxWidth: 480,
         }}
       >
-        We have unique access to a selection of highly specialized manufacturers
-        of fabrics and materials. We combine these highly specialized materials
-        to produce the highest quality polo shirts, t-shirts, sweatshirts, and
-        hoodies. You can see some of the products we&apos;ve made below.
+        {t("desc")}
       </p>
       <div
         className="carousel"

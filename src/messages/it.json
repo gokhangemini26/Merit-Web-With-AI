@@ -1,0 +1,49 @@
+{
+  "nav": {
+    "about": "Chi Siamo",
+    "process": "Processo",
+    "products": "Prodotti",
+    "clients": "Clienti",
+    "social": "Responsabilità Sociale",
+    "contact": "Contatti"
+  },
+  "home": {
+    "title": "CHI SIAMO",
+    "desc1": "Siamo un produttore di maglieria e prêt-à-porter con sede a Istanbul, specializzato in capi esclusivi e di alta qualità. Con oltre 30 anni di esperienza nel settore tessile, ci impegniamo a operare ai massimi standard e offriamo costantemente le ultime innovazioni tessili e i trend industriali.",
+    "desc2": "Il nostro team di professionisti altamente qualificati affronta le sfide quotidiane del settore con passione e competenza. In Merit, crediamo fermamente nella forza del lavoro di squadra. Siamo orgogliosi di partecipare attivamente a ogni progetto, garantendo l’eccellenza in ogni fase della produzione.",
+    "cta": "Contattaci ora!"
+  },
+  "products": {
+    "title": "PRODOTTI",
+    "desc": "Disponiamo di un accesso esclusivo a una selezione di produttori altamente specializzati di tessuti e materiali. Combiniamo questi materiali speciali per produrre polo, t-shirt, felpe e felpe con cappuccio di altissima qualità. Di seguito puoi vedere alcuni dei nostri prodotti realizzati.",
+    "badges": {
+      "organic": "🌿 COTONE BIOLOGICO",
+      "wool": "✨ LANA PREGIATA",
+      "slim": "👔 TAGLIO SLIM"
+    }
+  },
+  "process": {
+    "title": "PROCESSO DI PRODUZIONE",
+    "desc": "Il nostro processo di produzione prêt-à-porter è gestito meticolosamente dalla fase di progettazione fino alla spedizione.",
+    "steps": {
+      "design": "Design e Sviluppo",
+      "sourcing": "Approvvigionamento Tessuti",
+      "cutting": "Taglio e Cucito",
+      "quality": "Controllo Qualità",
+      "logistics": "Logistica"
+    }
+  },
+  "consultant": {
+    "btnChat": "Parla con il consulente",
+    "btnEnd": "Termina sessione",
+    "btnConnecting": "Connessione...",
+    "welcomeTitle": "Merit Tessile",
+    "welcomeSubtitle": "Consulente IA",
+    "welcomeDesc": "Sei pronto a esplorare il mondo di Merit Tessile con il nostro consulente IA?",
+    "welcomeBtn": "Inizia sessione",
+    "greeting": "Buongiorno, benvenuto in Merit Tessile. Sarò lieto di aiutarla.",
+    "aiRole": "Sei il consulente IA di Merit Tessile. Fornisci informazioni sulla produzione tessile, prêt-à-porter, sostenibilità e operazioni globali.",
+    "indicatorNavigating": "Navigazione verso",
+    "indicatorShowing": "mostra"
+  }
+}

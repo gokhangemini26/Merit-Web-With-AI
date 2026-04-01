@@ -1,0 +1,52 @@
+{
+  "nav": {
+    "about": "Über uns",
+    "process": "Prozess",
+    "products": "Produkte",
+    "clients": "Kunden",
+    "social": "Soziale Verantwortung",
+    "contact": "Kontakt"
+  },
+  "home": {
+    "title": "ÜBER UNS",
+    "desc1": "Wir sind ein in Istanbul ansässiger Hersteller von Trikotwaren und Konfektion, der sich auf hochwertige und exklusive Kleidungsstücke spezialisiert hat. Mit über 30 Jahren Erfahrung in der Textilindustrie verpflichten wir uns zu höchsten Standards und bieten unseren Kunden kontinuierlich die neuesten Stoffinnovationen und Branchentrends.",
+    "desc2": "Unser Team aus hochqualifizierten Fachkräften widmet sich den täglichen Herausforderungen der Branche mit Leidenschaft und Fachwissen. Bei Merit glauben wir fest an die Kraft des Teamworks. Wir sind stolz darauf, aktiv an jedem unserer Projekte beteiligt zu sein und bei jedem Produktionsschritt Exzellenz zu gewährleisten.",
+    "cta": "Nehmen Sie jetzt Kontakt auf!"
+  },
+  "products": {
+    "title": "PRODUKTE",
+    "desc": "Wir haben exklusiven Zugang zu einer Auswahl hochspezialisierter Hersteller von Stoffen und Materialien. Wir kombinieren diese besonderen Materialien, um Poloshirts, T-Shirts, Sweatshirts und Hoodies von höchster Qualität herzustellen. Unten sehen Sie einige unserer gefertigten Produkte.",
+    "badges": {
+      "organic": "🌿 BIO-BAUMWOLLE",
+      "wool": "✨ PREMIUM-WOLLE",
+      "slim": "👔 SLIM FIT"
+    }
+  },
+  "process": {
+    "title": "PRODUKTIONSPROZESS",
+    "desc": "Unser Konfektionsprozess wird von der Designphase bis zum Versand akribisch gesteuert.",
+    "steps": {
+      "design": "Design & Entwicklung",
+      "sourcing": "Stoffbeschaffung",
+      "cutting": "Zuschnitt & Nähen",
+      "quality": "Qualitätskontrolle",
+      "logistics": "Logistik"
+    },
+    "desc_sourcing": "Die Stoffe werden sorgfältig nach Ihren spezifischen Anforderungen in Bezug auf Zusammensetzung, Leistung und Textur ausgewählt. Wir bieten auch individuelle Färbungen an, um Ihre exakten Farbvorgaben zu erfüllen, sowie zusätzliche Veredelungsprozesse zur Steigerung der Weichheit und Gesamtqualität.",
+    "desc_design": "Für jede Bestellung entwickeln wir einen Prototyp zu Ihrer Freigabe, was Ihnen die Möglichkeit gibt, Funktionalität und Passform Ihres Designs zu testen und zu verfeinern. Sobald die Muster genehmigt sind, fahren wir mit der Serienproduktion fort und gewährleisten Konsistenz und Qualität in jeder Phase.",
+    "desc_manufacturing": "Die Serienproduktion erfolgt auf unseren spezialisierten Produktionslinien, wo alle Artikel auftragsbezogen gefertigt und in jeder Phase sorgfältig überwacht werden. Zusätzliche Qualitätskontrollen werden während des Veredelungsprozesses durchgeführt, um sicherzustellen, dass jedes Produkt unseren Standards entspricht, bevor es sorgfältig für den Versand verpackt wird."
+  },
+  "consultant": {
+    "btnChat": "Mit Berater sprechen",
+    "btnEnd": "Sitzung beenden",
+    "btnConnecting": "Verbindet...",
+    "welcomeTitle": "Merit Textil",
+    "welcomeSubtitle": "KI-Berater",
+    "welcomeDesc": "Sind Sie bereit, die Welt von Merit Textil mit unserem KI-Berater zu erkunden?",
+    "welcomeBtn": "Sitzung starten",
+    "greeting": "Hallo, willkommen bei Merit Textil. Ich freue mich, Ihnen behilflich zu sein.",
+    "aiRole": "Sie sind der KI-Berater von Merit Textil. Sie geben Informationen über Textilproduktion, Konfektion, Nachhaltigkeit und globale Abläufe.",
+    "indicatorNavigating": "Navigiere zu",
+    "indicatorShowing": "zeige"
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "nav": {
+    "about": "Hakkımızda",
+    "process": "Süreç",
+    "products": "Ürünler",
+    "clients": "Müşteriler",
+    "social": "Sosyal Sorumluluk",
+    "contact": "İletişim"
+  },
+  "home": {
+    "title": "HAKKIMIZDA",
+    "desc1": "Biz, yüksek kaliteli ve özel giysiler konusunda uzmanlaşmış, İstanbul merkezli bir örme kumaş (jersey) ve konfeksiyon üreticisiyiz. Tekstil endüstrisindeki 30 yılı aşkın tecrübemizle, en yüksek standartlarda faaliyet göstermeye ve müşterilerimize en yeni kumaş inovasyonlarını ve endüstriyel trendleri sunmaya kararlıyız.",
+    "desc2": "Yüksek becerilere sahip profesyonel ekibimiz, sektörün günlük zorluklarını tutku ve uzmanlıkla karşılamaya kendini adamıştır. Merit'te ekip çalışmasının gücüne yürekten inanıyoruz. Üretimin her aşamasında mükemmelliği sağlayarak üstlendiğimiz her projeye aktif olarak dahil olmaktan gurur duyuyoruz.",
+    "cta": "Hemen iletişime geçin!"
+  },
+  "products": {
+    "title": "ÜRÜNLER",
+    "desc": "Kumaş ve malzeme alanında son derece uzmanlaşmış üreticilere benzersiz erişimimiz bulunmaktadır. Bu özel malzemeleri birleştirerek en yüksek kalitede polo yaka tişörtler, tişörtler, sweatshirtler ve kapüşonlu üstler (hoodies) üretiyoruz. Aşağıda ürettiğimiz bazı ürünleri görebilirsiniz.",
+    "badges": {
+      "organic": "🌿 ORGANİK PAMUK",
+      "wool": "✨ PREMİUM YÜN",
+      "slim": "👔 DAR KESİM"
+    }
+  },
+  "process": {
+    "title": "ÜRETİM SÜRECİ",
+    "desc": "Konfeksiyon üretim sürecimiz, tasarım aşamasından sevkiyata kadar titizlikle yönetilmektedir.",
+    "steps": {
+      "design": "Tasarım & Geliştirme",
+      "sourcing": "Kumaş Tedariği",
+      "cutting": "Kesim & Dikim",
+      "quality": "Kalite Kontrol",
+      "logistics": "Lojistik"
+    },
+    "desc_sourcing": "Kumaşlar, kompozisyon, performans ve doku bakımından özel gereksinimlerinize uyacak şekilde özenle tedarik edilir. Ayrıca, tam renk spesifikasyonlarınızı karşılamak için özel boyama hizmeti ve yumuşaklığı ile genel kaliteyi artırmak için ek terbiye işlemleri sunuyoruz.",
+    "desc_design": "Her sipariş için onayınıza sunulmak üzere bir prototip geliştiriyoruz; bu size tasarımınızın işlevselliğini ve kalıbını test etme ve iyileştirme fırsatı sunar. Numuneler onaylandıktan sonra, her aşamada tutarlılık ve kalite sağlayarak toplu üretime geçiyoruz.",
+    "desc_manufacturing": "Toplu üretim, her bir parçanın sipariş üzerine üretildiği ve her aşamada dikkatle izlendiği özel üretim hatlarımızda gerçekleşir. Bitim (finisaj) işlemi sırasında ek kalite denetimleri yapılarak, her ürünün teslimat için paketlenmeden önce standartlarımızı karşıladığından emin olunur."
+  },
+  "consultant": {
+    "btnChat": "Danışmanla Sohbet Et",
+    "btnEnd": "Görüşmeyi Bitir",
+    "btnConnecting": "Bağlanıyor...",
+    "welcomeTitle": "Merit Tekstil",
+    "welcomeSubtitle": "Yapay Zeka Danışmanı",
+    "welcomeDesc": "Merit Tekstil'in dünyasını yapay zeka danışmanımız eşliğinde keşfetmeye hazır mısınız?",
+    "welcomeBtn": "Görüşmeyi Başlat",
+    "greeting": "Merhaba, Merit Tekstil'e hoş geldiniz. Size yardımcı olmaktan mutluluk duyarım.",
+    "aiRole": "Sen Merit Tekstil'in yapay zeka danışmanısın. Tekstil üretimi, konfeksiyon, sürdürülebilirlik ve küresel operasyonlar konularında bilgi veriyorsun.",
+    "indicatorNavigating": "Yönlendiriliyorsunuz",
+    "indicatorShowing": "gösteriliyor"
+  }
+}

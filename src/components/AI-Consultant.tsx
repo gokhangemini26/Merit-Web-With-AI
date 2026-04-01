@@ -3,99 +3,28 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
-  MessageSquare, ArrowRight, X, Square
+  MessageSquare, ArrowRight, X, Square, Languages
 } from "lucide-react";
 import { GeminiLiveClient } from "@/lib/gemini-live";
-import { usePathname, useRouter } from "next/navigation";
-
-// --- i18n Translations (Merit Specific) ---
-
-const TRANSLATIONS: Record<string, any> = {
-  tr: {
-    btnChat: "Danışmanla Sohbet Et",
-    btnEnd: "Görüşmeyi Bitir",
-    btnConnecting: "Bağlanıyor...",
-    welcomeTitle: "Merit Tekstil",
-    welcomeSubtitle: "Yapay Zeka Danışmanı",
-    welcomeDesc: "Merit Tekstil'in dünyasını yapay zeka danışmanımız eşliğinde keşfetmeye hazır mısınız?",
-    welcomeBtn: "Görüşmeyi Başlat",
-    greeting: "Merhaba, Merit Tekstil'e hoş geldiniz. Size yardımcı olmaktan mutluluk duyarım.",
-    aiRole: "Sen Merit Tekstil'in yapay zeka danışmanısın. Tekstil üretimi, sürdürülebilirlik ve küresel operasyonlar konularında bilgi veriyorsun.",
-    indicatorNavigating: "Yönlendiriliyorsunuz",
-    indicatorShowing: "gösteriliyor",
-    errorTitle: "Bağlantı Sorunu",
-    errorMic: "Mikrofon erişimi reddedildi.",
-  },
-  en: {
-    btnChat: "Talk to Consultant",
-    btnEnd: "End Session",
-    btnConnecting: "Connecting...",
-    welcomeTitle: "Merit Tekstil",
-    welcomeSubtitle: "AI Consultant",
-    welcomeDesc: "Are you ready to explore the world of Merit Tekstil with our AI consultant?",
-    welcomeBtn: "Start Session",
-    greeting: "Hello, welcome to Merit Tekstil. I would be happy to help you.",
-    aiRole: "You are Merit Tekstil's AI consultant. You provide information about textile production, sustainability, and global operations.",
-    indicatorNavigating: "Navigating to",
-    indicatorShowing: "showing",
-    errorTitle: "Connection Issue",
-    errorMic: "Microphone access denied.",
-  },
-  es: {
-    btnChat: "Hablar con Consultor",
-    btnEnd: "Finalizar",
-    welcomeTitle: "Merit Tekstil",
-    welcomeSubtitle: "Consultor de IA",
-    welcomeDesc: "¿Estás listo para explorar el mundo de Merit Tekstil con nuestro consultor de IA?",
-    welcomeBtn: "Iniciar Sesión",
-    greeting: "Hola, bienvenido a Merit Tekstil. Estaré encantado de ayudarte.",
-    aiRole: "Eres el consultor de IA de Merit Tekstil. Brindas información sobre producción textil, sostenibilidad y operaciones globales.",
-  },
-  it: {
-    btnChat: "Parla con il Consulente",
-    btnEnd: "Termina",
-    welcomeTitle: "Merit Tekstil",
-    welcomeSubtitle: "Consulente IA",
-    welcomeDesc: "Sei pronto a esplorare il mondo di Merit Tekstil con il nostro consulente IA?",
-    welcomeBtn: "Inizia Sessione",
-    greeting: "Buongiorno, benvenuto in Merit Tekstil. Sarei felice di aiutarla.",
-    aiRole: "Sei il consulente IA di Merit Tekstil. Fornisci informazioni sulla produzione tessile, la sostenibilità e le operazioni globali.",
-  }
-};
+import { usePathname, useRouter, Link } from "@/i18n/routing";
+import { useTranslations, useLocale } from "next-intl";
+import { useSpotlight } from "@/components/SpotlightProvider";
 
 const LOGO_URL = "/images/logo.png";
 
-const getSystemInstruction = (lang: string) => {
-  const t = TRANSLATIONS[lang] || TRANSLATIONS.en;
-  return `
-${t.aiRole}
-GİRİŞ: "Başla" komutunu aldığında, kullanıcıya HEMEN şu cümleyle başla: "${t.greeting}"
-
-SEKSIYON YÖNLENDiRME: Konu değiştiğinde mutlaka anahtar kelimeleri söyle:
-- Ürünler: "ürünlerimizi inceleyelim"
-- Süreç: "üretim sürecimiz"
-- Müşteriler: "müşterilerimiz"
-- İletişim: "iletişim sayfası"
-- Sosyal Sorumluluk: "sosyal sorumluluk"
-
-Konuşma tarzın: Profesyonel, vizyoner, çözüm odaklı.
-Dil: ${lang === 'tr' ? 'Türkçe' : lang === 'es' ? 'Español' : lang === 'it' ? 'Italiano' : 'English'}.
-`;
-};
-
 export function AIConsultant() {
+  const t = useTranslations("consultant");
+  const locale = useLocale();
   const pathname = usePathname();
   const router = useRouter();
+  const { setHighlight } = useSpotlight();
   
-  const [lang, setLang] = useState('tr');
   const [isLive, setIsLive] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
   const [isMicOn, setIsMicOn] = useState(false);
   const [transcriptions, setTranscriptions] = useState<{ text: string; isUser: boolean }[]>([]);
   const [audioLevel, setAudioLevel] = useState(0);
   const [isWelcomeVisible, setIsWelcomeVisible] = useState(false);
-  const [activeSection, setActiveSection] = useState<string | null>(null);
-  const [isSpotlightActive, setIsSpotlightActive] = useState(false);
   const [debugInfo, setDebugInfo] = useState<string[]>([]);
   const [showPermissionError, setShowPermissionError] = useState(false);
   const [permissionErrorMessage, setPermissionErrorMessage] = useState("");
@@ -110,43 +39,19 @@ export function AIConsultant() {
 
   const addDebug = (msg: string) => {
     console.log(`[AIConsultant] ${msg}`);
-    setDebugInfo(prev => [...prev.slice(-10), `${new Date().toLocaleTimeString()}: ${msg}`]);
   };
 
   // --- Auto-open after 1s ---
   useEffect(() => {
-    const timer = setTimeout(() => setIsWelcomeVisible(true), 1000);
+    const timer = setTimeout(() => setIsWelcomeVisible(true), 1500);
     return () => clearTimeout(timer);
   }, []);
-
-  // --- IP-based Language Detection ---
-  useEffect(() => {
-    const fetchGeo = async () => {
-      try {
-        const res = await fetch('https://ipapi.co/json/');
-        const data = await res.json();
-        const country = data.country_code?.toUpperCase();
-        if (country === 'TR') setLang('tr');
-        else if (['ES', 'MX', 'AR', 'CO', 'CL', 'PE'].includes(country)) setLang('es');
-        else if (country === 'IT') setLang('it');
-        else setLang('en');
-      } catch {
-        const browserLang = navigator.language.split('-')[0];
-        if (['tr', 'es', 'it'].includes(browserLang)) setLang(browserLang);
-        else setLang('en');
-      }
-    };
-    fetchGeo();
-  }, []);
-
-  const t = TRANSLATIONS[lang] || TRANSLATIONS.en;
 
   const getAudioContext = useCallback(() => {
     if (!audioContextRef.current) {
       audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)({
         sampleRate: 16000,
       });
-      addDebug("AudioContext initialized");
     }
     return audioContextRef.current;
   }, []);
@@ -181,7 +86,6 @@ export function AIConsultant() {
 
   const startAudioCapture = async (existingStream?: MediaStream) => {
     try {
-      addDebug("Starting audio capture...");
       const stream = existingStream || await navigator.mediaDevices.getUserMedia({ audio: true });
       streamRef.current = stream;
       const audioContext = getAudioContext();
@@ -204,7 +108,6 @@ export function AIConsultant() {
       processor.connect(audioContext.destination);
       processorRef.current = processor;
       setIsMicOn(true);
-      addDebug("Audio capture active");
     } catch (err: any) {
       addDebug(`Mic error: ${err.message}`);
     }
@@ -212,21 +115,69 @@ export function AIConsultant() {
 
   const detectAndNavigate = useCallback((text: string) => {
     const t = text.toLowerCase();
-    if (/ürün|product/.test(t)) { router.push('/products'); setActiveSection('products'); }
-    else if (/müşteri|client/.test(t)) { router.push('/clients'); setActiveSection('clients'); }
-    else if (/süreç|process/.test(t)) { router.push('/process'); setActiveSection('process'); }
-    else if (/iletişim|contact/.test(t)) { router.push('/contact'); setActiveSection('contact'); }
-    else if (/sosyal|social|sürdürülebilirlik|sustainability/.test(t)) { router.push('/social-responsibility'); setActiveSection('social'); }
-    
-    if (activeSection) {
-      setIsSpotlightActive(true);
-      setTimeout(() => setIsSpotlightActive(false), 5000);
+    let targetSection: string | null = null;
+    let targetPath: string | null = null;
+
+    if (/hakkımızda|about us|über uns|chi siamo|关于我们/.test(t)) {
+      targetPath = '/';
+      targetSection = 'about';
+    } else if (/ürün|product|produkt|prodotto|产品/.test(t)) {
+      targetPath = '/products';
+      targetSection = 'products';
+    } else if (/süreç|process|prozess|processo|生产工艺|工艺/.test(t)) {
+      targetPath = '/process';
+      targetSection = 'process';
+    } else if (/müşteri|client|kunden|clienti|客户/.test(t)) {
+      targetPath = '/clients';
+      targetSection = 'clients';
+    } else if (/iletişim|contact|kontakt|contatti|联系/.test(t)) {
+      targetPath = '/contact';
+      targetSection = 'contact';
+    } else if (/sosyal|social|sürdürülebilirlik|sustainability|verantwortung|responsabilità|责任|可持续/.test(t)) {
+      targetPath = '/social-responsibility';
+      targetSection = 'social';
     }
-  }, [router, activeSection]);
+    
+    if (targetPath) {
+      router.push(targetPath as any);
+      if (targetSection) {
+        // Wait for possible navigation before highlighting
+        setTimeout(() => {
+          setHighlight(targetSection);
+          // Automatically clear highlight after some time
+          setTimeout(() => setHighlight(null), 8000 * 2); 
+        }, 800);
+      }
+    }
+  }, [router, setHighlight]);
+
+  const getSystemInstruction = useCallback(() => {
+    const langNames: Record<string, string> = {
+      tr: 'Turkish', en: 'English', de: 'German', it: 'Italian', zh: 'Chinese'
+    };
+    const currentLang = langNames[locale] || 'English';
+
+    return `
+${t("aiRole")}
+LANGUAGE: Speak ONLY in ${currentLang}.
+GİRİŞ: Start the conversation with: "${t("greeting")}"
+
+NAVIGATION & SPOTLIGHT:
+When you talk about a topic, use words related to that section.
+- About Us/Company: Mention "About Us" or "History" to highlight the main section.
+- Products: Mention "Products" or specific items like "T-shirts", "Hoodies", "Polo" to highlight Products.
+- Process: Mention "Production process", "Manufacturing", "Quality Control" for the Process section.
+- Clients: Mention "Our clients" or "Partners".
+- Contact: Mention "Contact us" or "Location".
+- Social Responsibility: Mention "Sustainability" or "Environment".
+
+STYLE: Professional, visionary, expert in Textile and Ready-to-Wear (Konfeksiyon).
+Use terms like "Örme Kumaş" (Jersey), "Fason Üretim", "Numune Üretimi", "Tedarik Zinciri Management".
+`;
+  }, [locale, t]);
 
   const toggleLive = async () => {
     if (isLive) {
-      addDebug("Stopping session...");
       clientRef.current?.close();
       clientRef.current = null;
       streamRef.current?.getTracks().forEach(t => t.stop());
@@ -234,51 +185,32 @@ export function AIConsultant() {
       setIsLive(false);
       setIsMicOn(false);
       setIsConnecting(false);
+      setHighlight(null);
       return;
     }
 
     let audioStream: MediaStream | undefined;
     try {
-      addDebug("Requesting mic...");
       audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
     } catch (err: any) {
-      addDebug(`Mic denied: ${err.message}`);
       setPermissionErrorMessage("Mikrofon izni verilmedi.");
       setShowPermissionError(true);
       return;
     }
 
-    addDebug("Connecting to Gemini...");
+    setIsConnecting(true);
+    const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
 
-    // 1. Get Key (Check URL param first for debugging, then Env Var)
-    const urlParams = new URLSearchParams(window.location.search);
-    const urlKey = urlParams.get('key');
-    const storageKey = typeof window !== 'undefined' ? localStorage.getItem('GEMINI_API_KEY_OVERRIDE') : null;
-    const apiKey = urlKey || storageKey || process.env.NEXT_PUBLIC_GEMINI_API_KEY;
-
-    if (!apiKey || apiKey === "undefined" || apiKey === "null" || apiKey.length < 10) {
-      addDebug("API Key Missing (Client-side)");
-      setPermissionErrorMessage("API Key bulunamadı. Vercel Ayarlarından NEXT_PUBLIC_GEMINI_API_KEY değişkenini ekleyin veya aşağıdaki butona tıklayarak geçici olarak yapıştırın.");
+    if (!apiKey) {
+      setPermissionErrorMessage("API Key missing.");
       setShowPermissionError(true);
-      audioStream.getTracks().forEach(t => t.stop());
-      setIsConnecting(false);
-      return;
-    }
-
-    addDebug(`API Key Check: ${apiKey.substring(0, 6)}...`);
-
-    try {
-      const audioContext = getAudioContext();
-      if (audioContext.state === 'suspended') await audioContext.resume();
-    } catch (err: any) {
-      addDebug(`Audio Error: ${err.message}`);
       audioStream.getTracks().forEach(t => t.stop());
       setIsConnecting(false);
       return;
     }
 
     clientRef.current = new GeminiLiveClient(apiKey, {
-      systemInstruction: getSystemInstruction(lang),
+      systemInstruction: getSystemInstruction(),
       onAudioData: (data) => {
         audioQueueRef.current.push(data);
         playNextAudio();
@@ -293,20 +225,16 @@ export function AIConsultant() {
         if (text) detectAndNavigate(text);
       },
       onClose: () => setIsLive(false),
-      onError: (err) => {
-        addDebug(`Gemini error: ${err.message}`);
-      }
+      onError: (err) => addDebug(`Error: ${err.message}`)
     });
 
     try {
       await clientRef.current.connect();
-      addDebug("Connected!");
       setIsLive(true);
       setIsConnecting(false);
       pendingAudioStreamRef.current = audioStream;
       clientRef.current.triggerGreeting();
     } catch (err: any) {
-      addDebug(`Connection failed: ${err.message}`);
       audioStream.getTracks().forEach(t => t.stop());
       setIsConnecting(false);
     }
@@ -314,24 +242,24 @@ export function AIConsultant() {
 
   return (
     <>
-      <AnimatePresence>
-        {isSpotlightActive && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[80] bg-black/40 backdrop-blur-sm pointer-events-none" />
-        )}
-      </AnimatePresence>
-
       <div className="fixed bottom-6 right-6 z-[100] flex flex-col items-end gap-4">
         <AnimatePresence>
           {isLive && (
-            <motion.div initial={{ opacity: 0, scale: 0.8, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.8, y: 20 }} className="bg-[#002e5d]/90 backdrop-blur-md p-4 rounded-2xl border border-white/20 shadow-2xl w-72 mb-2">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-3 h-3 rounded-full bg-red-500 animate-pulse" />
-                <span className="text-xs font-bold text-white uppercase tracking-widest">Live Consultant</span>
+            <motion.div initial={{ opacity: 0, scale: 0.8, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.8, y: 20 }} className="bg-[#002e5d]/90 backdrop-blur-md p-4 rounded-2xl border border-white/20 shadow-2xl w-80 mb-2">
+              <div className="flex items-center justify-between mb-3 border-b border-white/10 pb-2">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                  <span className="text-[10px] font-bold text-white uppercase tracking-widest">LIVE AI ASSISTANT</span>
+                </div>
+                <button onClick={toggleLive} className="text-white/50 hover:text-white"><X size={14} /></button>
               </div>
-              <div className="space-y-2 max-h-32 overflow-y-auto no-scrollbar">
+              <div className="space-y-3 max-h-40 overflow-y-auto pr-2 custom-scrollbar">
                 {transcriptions.map((tr, i) => (
-                  <div key={i} className={`text-sm ${tr.isUser ? 'text-gray-300 italic' : 'text-white font-medium'}`}>
-                    {tr.isUser ? 'You: ' : 'AI: '}{tr.text}
+                  <div key={i} className={`flex flex-col ${tr.isUser ? 'items-end' : 'items-start'}`}>
+                    <span className="text-[9px] text-white/40 mb-1 uppercase tracking-tighter">{tr.isUser ? 'You' : 'Merit AI'}</span>
+                    <div className={`p-2 rounded-lg text-xs leading-relaxed ${tr.isUser ? 'bg-white/10 text-white rounded-tr-none' : 'bg-[#e63946]/20 text-white rounded-tl-none border border-[#e63946]/30'}`}>
+                      {tr.text}
+                    </div>
                   </div>
                 ))}
               </div>
@@ -339,44 +267,53 @@ export function AIConsultant() {
           )}
         </AnimatePresence>
 
-        <button onClick={() => isLive ? toggleLive() : setIsWelcomeVisible(true)} className={`group h-16 w-16 rounded-full flex items-center justify-center transition-all shadow-xl hover:scale-110 active:scale-95 ${isLive ? 'bg-red-600' : 'bg-[#e63946]'}`}>
-          {isLive ? <Square className="text-white w-6 h-6 fill-current" /> : <MessageSquare className="text-white w-7 h-7" />}
-          {isLive && <motion.div animate={{ scale: 1 + audioLevel * 0.5, opacity: 0.5 - audioLevel * 0.3 }} className="absolute inset-0 rounded-full bg-red-500 -z-10" />}
-        </button>
+        <div className="flex items-center gap-3">
+          <AnimatePresence>
+            {!isLive && !isWelcomeVisible && (
+              <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} className="bg-white text-[#002e5d] px-4 py-2 rounded-full text-xs font-bold shadow-lg border border-[#002e5d]/10">
+                {t("btnChat")}
+              </motion.div>
+            )}
+          </AnimatePresence>
+          <button 
+            onClick={() => isLive ? toggleLive() : setIsWelcomeVisible(true)} 
+            className={`group h-14 w-14 rounded-full flex items-center justify-center transition-all shadow-2xl hover:scale-110 active:scale-95 relative ${isLive ? 'bg-red-600' : 'bg-[#002e5d]'}`}
+          >
+            {isLive ? <Square className="text-white w-5 h-5 fill-current" /> : <Languages className="text-white w-6 h-6" />}
+            {isLive && <motion.div animate={{ scale: [1, 1.5, 1], opacity: [0.5, 0, 0.5] }} transition={{ repeat: Infinity, duration: 2 }} className="absolute inset-0 rounded-full bg-red-500 -z-10" />}
+          </button>
+        </div>
       </div>
 
       <AnimatePresence>
         {isWelcomeVisible && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[110] flex items-center justify-center bg-[#002e5d]">
-            <div className="text-center p-8 max-w-lg">
-              <motion.img initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} src={LOGO_URL} className="h-24 mx-auto mb-8 grayscale brightness-200" />
-              <h2 className="text-4xl font-bold mb-4 text-white">{t.welcomeTitle}</h2>
-              <p className="text-white/70 mb-10 text-lg leading-relaxed">{t.welcomeDesc}</p>
-              <button onClick={() => { setIsWelcomeVisible(false); toggleLive(); }} className="bg-[#e63946] text-white px-10 py-5 rounded-full text-xl font-bold flex items-center gap-3 mx-auto hover:bg-red-700 transition-colors shadow-2xl">
-                {isConnecting ? t.btnConnecting : t.welcomeBtn} <ArrowRight className="w-6 h-6" />
-              </button>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[110] flex items-center justify-center bg-[#002e5d] p-6">
+            <div className="bg-white/5 backdrop-blur-xl p-10 rounded-[40px] border border-white/10 max-w-xl w-full text-center shadow-[0_0_100px_rgba(0,0,0,0.5)]">
+              <motion.img initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} src={LOGO_URL} className="h-16 mx-auto mb-8 brightness-0 invert" />
+              <h2 className="text-3xl font-bold mb-4 text-white uppercase tracking-tight">{t("welcomeTitle")}</h2>
+              <p className="text-white/60 mb-10 text-lg leading-relaxed font-light">{t("welcomeDesc")}</p>
               
-              {showPermissionError && (
-                <div className="mt-6 p-4 bg-red-500/20 rounded-xl border border-red-500/30">
-                  <p className="text-red-200 text-sm mb-4">{permissionErrorMessage}</p>
-                  <button 
-                    onClick={() => {
-                      const k = prompt("Gemini API Key yapıştırın:");
-                      if (k && k.startsWith("AIza")) {
-                        localStorage.setItem('GEMINI_API_KEY_OVERRIDE', k);
-                        window.location.reload();
-                      }
-                    }}
-                    className="text-xs bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg transition-colors border border-white/20"
-                  >
-                    API Anahtarını El ile Ayarla
-                  </button>
-                </div>
-              )}
+              <div className="flex flex-col gap-4">
+                <button 
+                  onClick={() => { setIsWelcomeVisible(false); toggleLive(); }} 
+                  className="bg-[#e63946] text-white px-8 py-5 rounded-full text-lg font-bold flex items-center justify-center gap-3 hover:bg-red-700 transition-all shadow-xl hover:shadow-red-900/40"
+                >
+                  {isConnecting ? t("btnConnecting") : t("welcomeBtn")} <ArrowRight className="w-5 h-5" />
+                </button>
+                <button onClick={() => setIsWelcomeVisible(false)} className="text-white/40 hover:text-white text-sm transition-colors uppercase tracking-widest font-bold">Maybe later</button>
+              </div>
+              
+              {showPermissionError && (<p className="text-red-400 mt-6 text-sm bg-red-400/10 p-3 rounded-xl border border-red-400/20">{permissionErrorMessage}</p>)}
             </div>
           </motion.div>
         )}
       </AnimatePresence>
+
+      <style jsx global>{`
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
+      `}</style>
     </>
   );
 }
