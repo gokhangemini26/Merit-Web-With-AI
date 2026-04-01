@@ -3,15 +3,12 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
-  Mic, MicOff, Monitor, MonitorOff, Play, Square, 
-  Calendar, ArrowRight, Sparkles, Workflow, Cpu, 
-  Layers, MessageSquare, ChevronRight, Menu, X,
-  PhoneCall, Globe, Zap, ShieldCheck, XCircle, Camera, CameraOff
+  MessageSquare, ArrowRight, X, Square
 } from "lucide-react";
 import { GeminiLiveClient } from "@/lib/gemini-live";
 import { usePathname, useRouter } from "next/navigation";
 
-// --- i18n Translations ---
+// --- i18n Translations (Merit Specific) ---
 
 const TRANSLATIONS: Record<string, any> = {
   tr: {
@@ -26,12 +23,12 @@ const TRANSLATIONS: Record<string, any> = {
     aiRole: "Sen Merit Tekstil'in yapay zeka danışmanısın. Tekstil üretimi, sürdürülebilirlik ve küresel operasyonlar konularında bilgi veriyorsun.",
     indicatorNavigating: "Yönlendiriliyorsunuz",
     indicatorShowing: "gösteriliyor",
-    errorTitle: "Erişim Sorunu",
+    errorTitle: "Bağlantı Sorunu",
     errorMic: "Mikrofon erişimi reddedildi.",
   },
   en: {
     btnChat: "Talk to Consultant",
-    btnEnd: "End Conversation",
+    btnEnd: "End Session",
     btnConnecting: "Connecting...",
     welcomeTitle: "Merit Tekstil",
     welcomeSubtitle: "AI Consultant",
@@ -41,7 +38,7 @@ const TRANSLATIONS: Record<string, any> = {
     aiRole: "You are Merit Tekstil's AI consultant. You provide information about textile production, sustainability, and global operations.",
     indicatorNavigating: "Navigating to",
     indicatorShowing: "showing",
-    errorTitle: "Access Issue",
+    errorTitle: "Connection Issue",
     errorMic: "Microphone access denied.",
   },
   es: {
@@ -53,8 +50,6 @@ const TRANSLATIONS: Record<string, any> = {
     welcomeBtn: "Iniciar Sesión",
     greeting: "Hola, bienvenido a Merit Tekstil. Estaré encantado de ayudarte.",
     aiRole: "Eres el consultor de IA de Merit Tekstil. Brindas información sobre producción textil, sostenibilidad y operaciones globales.",
-    indicatorNavigating: "Navegando a",
-    indicatorShowing: "mostrando",
   },
   it: {
     btnChat: "Parla con il Consulente",
@@ -65,8 +60,6 @@ const TRANSLATIONS: Record<string, any> = {
     welcomeBtn: "Inizia Sessione",
     greeting: "Buongiorno, benvenuto in Merit Tekstil. Sarei felice di aiutarla.",
     aiRole: "Sei il consulente IA di Merit Tekstil. Fornisci informazioni sulla produzione tessile, la sostenibilità e le operazioni globali.",
-    indicatorNavigating: "Navigazione verso",
-    indicatorShowing: "mostrando",
   }
 };
 
@@ -79,13 +72,13 @@ ${t.aiRole}
 GİRİŞ: "Başla" komutunu aldığında, kullanıcıya HEMEN şu cümleyle başla: "${t.greeting}"
 
 SEKSIYON YÖNLENDiRME: Konu değiştiğinde mutlaka anahtar kelimeleri söyle:
-- Ürünler/Products: "ürünlerimizi inceleyelim" veya "products"
-- Süreç/Process: "üretim sürecimiz" veya "production process"
-- Müşteriler/Clients: "müşterilerimiz" veya "clients"
-- İletişim/Contact: "iletişim sayfası" veya "contact"
-- Sosyal Sorumluluk/Sustainability: "sosyal sorumluluk" veya "sustainability"
+- Ürünler: "ürünlerimizi inceleyelim"
+- Süreç: "üretim sürecimiz"
+- Müşteriler: "müşterilerimiz"
+- İletişim: "iletişim sayfası"
+- Sosyal Sorumluluk: "sosyal sorumluluk"
 
-Konuşma tarzın: Profesyonel, bilgilendirici, kurumsal.
+Konuşma tarzın: Profesyonel, vizyoner, çözüm odaklı.
 Dil: ${lang === 'tr' ? 'Türkçe' : lang === 'es' ? 'Español' : lang === 'it' ? 'Italiano' : 'English'}.
 `;
 };
@@ -94,33 +87,35 @@ export function AIConsultant() {
   const pathname = usePathname();
   const router = useRouter();
   
-  const [lang, setLang] = useState('en');
+  const [lang, setLang] = useState('tr');
   const [isLive, setIsLive] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
   const [isMicOn, setIsMicOn] = useState(false);
-  const [isScreenSharing, setIsScreenSharing] = useState(false);
   const [transcriptions, setTranscriptions] = useState<{ text: string; isUser: boolean }[]>([]);
   const [audioLevel, setAudioLevel] = useState(0);
   const [isWelcomeVisible, setIsWelcomeVisible] = useState(false);
   const [activeSection, setActiveSection] = useState<string | null>(null);
   const [isSpotlightActive, setIsSpotlightActive] = useState(false);
-  const [aiCursorPos, setAiCursorPos] = useState({ x: -200, y: -200 });
-  const [aiCursorVisible, setAiCursorVisible] = useState(false);
+  const [debugInfo, setDebugInfo] = useState<string[]>([]);
+  const [showPermissionError, setShowPermissionError] = useState(false);
+  const [permissionErrorMessage, setPermissionErrorMessage] = useState("");
 
   const clientRef = useRef<GeminiLiveClient | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
   const processorRef = useRef<ScriptProcessorNode | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
-  const screenStreamRef = useRef<MediaStream | null>(null);
   const audioQueueRef = useRef<string[]>([]);
   const isPlayingRef = useRef(false);
   const pendingAudioStreamRef = useRef<MediaStream | null>(null);
 
+  const addDebug = (msg: string) => {
+    console.log(`[AIConsultant] ${msg}`);
+    setDebugInfo(prev => [...prev.slice(-10), `${new Date().toLocaleTimeString()}: ${msg}`]);
+  };
+
   // --- Auto-open after 1s ---
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsWelcomeVisible(true);
-    }, 1000);
+    const timer = setTimeout(() => setIsWelcomeVisible(true), 1000);
     return () => clearTimeout(timer);
   }, []);
 
@@ -151,15 +146,18 @@ export function AIConsultant() {
       audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)({
         sampleRate: 16000,
       });
+      addDebug("AudioContext initialized");
     }
     return audioContextRef.current;
   }, []);
 
   const playNextAudio = useCallback(async () => {
     if (audioQueueRef.current.length === 0 || isPlayingRef.current) return;
+
     isPlayingRef.current = true;
     const base64Data = audioQueueRef.current.shift()!;
     const audioContext = getAudioContext();
+
     const binaryString = atob(base64Data);
     const bytes = new Int16Array(binaryString.length / 2);
     for (let i = 0; i < binaryString.length; i += 2) {
@@ -174,21 +172,8 @@ export function AIConsultant() {
     source.buffer = buffer;
     source.connect(audioContext.destination);
     
-    const analyser = audioContext.createAnalyser();
-    source.connect(analyser);
-    const dataArray = new Uint8Array(analyser.frequencyBinCount);
-    
-    const updateLevel = () => {
-      if (!isPlayingRef.current) return;
-      analyser.getByteFrequencyData(dataArray);
-      setAudioLevel(dataArray.reduce((a, b) => a + b) / dataArray.length / 128);
-      requestAnimationFrame(updateLevel);
-    };
-    updateLevel();
-
     source.onended = () => {
       isPlayingRef.current = false;
-      setAudioLevel(0);
       playNextAudio();
     };
     source.start();
@@ -196,10 +181,12 @@ export function AIConsultant() {
 
   const startAudioCapture = async (existingStream?: MediaStream) => {
     try {
+      addDebug("Starting audio capture...");
       const stream = existingStream || await navigator.mediaDevices.getUserMedia({ audio: true });
       streamRef.current = stream;
       const audioContext = getAudioContext();
       if (audioContext.state === 'suspended') await audioContext.resume();
+
       const source = audioContext.createMediaStreamSource(stream);
       const processor = audioContext.createScriptProcessor(4096, 1, 1);
       processor.onaudioprocess = (e) => {
@@ -208,13 +195,18 @@ export function AIConsultant() {
         for (let i = 0; i < inputData.length; i++) pcmData[i] = Math.max(-1, Math.min(1, inputData[i])) * 0x7FFF;
         const base64Data = btoa(String.fromCharCode(...new Uint8Array(pcmData.buffer)));
         clientRef.current?.sendAudio(base64Data);
+        
+        const sum = inputData.reduce((a, b) => a + Math.abs(b), 0);
+        setAudioLevel(sum / inputData.length * 5);
       };
+      
       source.connect(processor);
       processor.connect(audioContext.destination);
       processorRef.current = processor;
       setIsMicOn(true);
-    } catch (err) {
-      console.error("Mic error:", err);
+      addDebug("Audio capture active");
+    } catch (err: any) {
+      addDebug(`Mic error: ${err.message}`);
     }
   };
 
@@ -234,70 +226,98 @@ export function AIConsultant() {
 
   const toggleLive = async () => {
     if (isLive) {
+      addDebug("Stopping session...");
       clientRef.current?.close();
       clientRef.current = null;
       streamRef.current?.getTracks().forEach(t => t.stop());
+      processorRef.current?.disconnect();
       setIsLive(false);
       setIsMicOn(false);
+      setIsConnecting(false);
+      return;
+    }
+
+    let audioStream: MediaStream | undefined;
+    try {
+      addDebug("Requesting mic...");
+      audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    } catch (err: any) {
+      addDebug(`Mic denied: ${err.message}`);
+      setPermissionErrorMessage("Mikrofon izni verilmedi.");
+      setShowPermissionError(true);
       return;
     }
 
     setIsConnecting(true);
-    try {
-      const audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      clientRef.current = new GeminiLiveClient(process.env.NEXT_PUBLIC_GEMINI_API_KEY || "", {
-        systemInstruction: getSystemInstruction(lang),
-        onAudioData: (data) => {
-          audioQueueRef.current.push(data);
-          playNextAudio();
-          if (pendingAudioStreamRef.current) {
-            const stream = pendingAudioStreamRef.current;
-            pendingAudioStreamRef.current = null;
-            setTimeout(() => startAudioCapture(stream), 1000);
-          }
-        },
-        onTranscription: (text, isUser) => {
-          setTranscriptions(prev => [...prev.slice(-3), { text, isUser }]);
-          if (text) detectAndNavigate(text);
-        },
-        onClose: () => setIsLive(false),
-      });
+    addDebug("Connecting to Gemini...");
 
+    try {
+      const audioContext = getAudioContext();
+      if (audioContext.state === 'suspended') await audioContext.resume();
+    } catch (err: any) {
+      addDebug(`Audio Error: ${err.message}`);
+      audioStream.getTracks().forEach(t => t.stop());
+      setIsConnecting(false);
+      return;
+    }
+
+    const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+    if (!apiKey) {
+      addDebug("API Key Missing");
+      setPermissionErrorMessage("API Key bulunamadı (Vercel Settings -> Environment Variables).");
+      setShowPermissionError(true);
+      audioStream.getTracks().forEach(t => t.stop());
+      setIsConnecting(false);
+      return;
+    }
+
+    clientRef.current = new GeminiLiveClient(apiKey, {
+      systemInstruction: getSystemInstruction(lang),
+      onAudioData: (data) => {
+        audioQueueRef.current.push(data);
+        playNextAudio();
+        if (pendingAudioStreamRef.current) {
+          const stream = pendingAudioStreamRef.current;
+          pendingAudioStreamRef.current = null;
+          setTimeout(() => startAudioCapture(stream), 1500);
+        }
+      },
+      onTranscription: (text, isUser) => {
+        setTranscriptions(prev => [...prev.slice(-4), { text, isUser }]);
+        if (text) detectAndNavigate(text);
+      },
+      onClose: () => setIsLive(false),
+      onError: (err) => {
+        addDebug(`Gemini error: ${err.message}`);
+      }
+    });
+
+    try {
       await clientRef.current.connect();
+      addDebug("Connected!");
       setIsLive(true);
       setIsConnecting(false);
       pendingAudioStreamRef.current = audioStream;
       clientRef.current.triggerGreeting();
-    } catch (err) {
-      console.error("Connection failed:", err);
+    } catch (err: any) {
+      addDebug(`Connection failed: ${err.message}`);
+      audioStream.getTracks().forEach(t => t.stop());
       setIsConnecting(false);
     }
   };
 
   return (
     <>
-      {/* Spotlight Effect */}
       <AnimatePresence>
         {isSpotlightActive && (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[80] bg-black/40 backdrop-blur-sm pointer-events-none"
-          />
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[80] bg-black/40 backdrop-blur-sm pointer-events-none" />
         )}
       </AnimatePresence>
 
-      {/* Floating Button */}
       <div className="fixed bottom-6 right-6 z-[100] flex flex-col items-end gap-4">
         <AnimatePresence>
           {isLive && (
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.8, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.8, y: 20 }}
-              className="bg-[#002e5d]/90 backdrop-blur-md p-4 rounded-2xl border border-white/20 shadow-2xl w-72 mb-2"
-            >
+            <motion.div initial={{ opacity: 0, scale: 0.8, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.8, y: 20 }} className="bg-[#002e5d]/90 backdrop-blur-md p-4 rounded-2xl border border-white/20 shadow-2xl w-72 mb-2">
               <div className="flex items-center gap-3 mb-3">
                 <div className="w-3 h-3 rounded-full bg-red-500 animate-pulse" />
                 <span className="text-xs font-bold text-white uppercase tracking-widest">Live Consultant</span>
@@ -313,48 +333,23 @@ export function AIConsultant() {
           )}
         </AnimatePresence>
 
-        <button
-          onClick={() => isLive ? toggleLive() : setIsWelcomeVisible(true)}
-          className={`group h-16 w-16 rounded-full flex items-center justify-center transition-all shadow-xl hover:scale-110 active:scale-95 ${
-            isLive ? 'bg-red-600' : 'bg-[#e63946]'
-          }`}
-        >
+        <button onClick={() => isLive ? toggleLive() : setIsWelcomeVisible(true)} className={`group h-16 w-16 rounded-full flex items-center justify-center transition-all shadow-xl hover:scale-110 active:scale-95 ${isLive ? 'bg-red-600' : 'bg-[#e63946]'}`}>
           {isLive ? <Square className="text-white w-6 h-6 fill-current" /> : <MessageSquare className="text-white w-7 h-7" />}
-          
-          {/* Audio Visualizer Ring */}
-          {isLive && (
-            <motion.div 
-              animate={{ scale: 1 + audioLevel * 0.5, opacity: 0.5 - audioLevel * 0.3 }}
-              className="absolute inset-0 rounded-full bg-red-500 -z-10"
-            />
-          )}
+          {isLive && <motion.div animate={{ scale: 1 + audioLevel * 0.5, opacity: 0.5 - audioLevel * 0.3 }} className="absolute inset-0 rounded-full bg-red-500 -z-10" />}
         </button>
       </div>
 
-      {/* Welcome Screen Overlay */}
       <AnimatePresence>
         {isWelcomeVisible && (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[110] flex items-center justify-center bg-[#002e5d]"
-          >
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[110] flex items-center justify-center bg-[#002e5d]">
             <div className="text-center p-8 max-w-lg">
-              <motion.img 
-                initial={{ y: -20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                src={LOGO_URL} 
-                className="h-24 mx-auto mb-8 grayscale brightness-200"
-              />
+              <motion.img initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} src={LOGO_URL} className="h-24 mx-auto mb-8 grayscale brightness-200" />
               <h2 className="text-4xl font-bold mb-4 text-white">{t.welcomeTitle}</h2>
               <p className="text-white/70 mb-10 text-lg leading-relaxed">{t.welcomeDesc}</p>
-              <button 
-                onClick={() => { setIsWelcomeVisible(false); toggleLive(); }}
-                className="bg-[#e63946] text-white px-10 py-5 rounded-full text-xl font-bold flex items-center gap-3 mx-auto hover:bg-red-700 transition-colors shadow-2xl"
-              >
-                {t.welcomeBtn} <ArrowRight className="w-6 h-6" />
+              <button onClick={() => { setIsWelcomeVisible(false); toggleLive(); }} className="bg-[#e63946] text-white px-10 py-5 rounded-full text-xl font-bold flex items-center gap-3 mx-auto hover:bg-red-700 transition-colors shadow-2xl">
+                {isConnecting ? t.btnConnecting : t.welcomeBtn} <ArrowRight className="w-6 h-6" />
               </button>
+              {showPermissionError && (<p className="text-red-400 mt-4 text-sm">{permissionErrorMessage}</p>)}
             </div>
           </motion.div>
         )}
