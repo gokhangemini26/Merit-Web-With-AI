@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
+import { AIConsultant } from "@/components/AI-Consultant";
 
 const poppins = localFont({
   src: [
@@ -27,6 +28,7 @@ export default function RootLayout({
     <html lang="en" className={`h-full ${poppins.variable}`}>
       <body className="min-h-full">
         {children}
+        <AIConsultant />
       </body>
     </html>
   );
