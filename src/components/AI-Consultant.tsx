@@ -115,6 +115,19 @@ export function AIConsultant() {
 
   const detectAndNavigate = useCallback((text: string) => {
     const t = text.toLowerCase();
+    
+    // 1. Handle Language Switch Command from AI
+    const langMatch = t.match(/\[set_lang:\s*(tr|en|de|it|zh)\]/i);
+    if (langMatch && langMatch[1]) {
+      const newLang = langMatch[1].toLowerCase();
+      if (newLang !== locale) {
+        // Redirect to same path but different locale
+        const newPath = pathname; 
+        router.push(newPath as any, { locale: newLang });
+        return;
+      }
+    }
+
     let targetSection: string | null = null;
     let targetPath: string | null = null;
 
@@ -141,38 +154,38 @@ export function AIConsultant() {
     if (targetPath) {
       router.push(targetPath as any);
       if (targetSection) {
-        // Wait for possible navigation before highlighting
         setTimeout(() => {
           setHighlight(targetSection);
-          // Automatically clear highlight after some time
-          setTimeout(() => setHighlight(null), 8000 * 2); 
+          setTimeout(() => setHighlight(null), 16000); 
         }, 800);
       }
     }
-  }, [router, setHighlight]);
+  }, [router, setHighlight, locale, pathname]);
 
   const getSystemInstruction = useCallback(() => {
-    const langNames: Record<string, string> = {
-      tr: 'Turkish', en: 'English', de: 'German', it: 'Italian', zh: 'Chinese'
-    };
-    const currentLang = langNames[locale] || 'English';
-
     return `
 ${t("aiRole")}
-LANGUAGE: Speak ONLY in ${currentLang}.
+ROLE: You are the Merit Textile AI Consultant. You are polyglot and you MUST respond in the SAME language the user speaks to you.
+SUPPORTED LANGUAGES: Turkish, English, German, Italian, Chinese.
+
+LANGUAGE SWITCHING:
+If the user starts speaking a different language than the current one (${locale}), you MUST:
+1. Respond in that new language.
+2. At the VERY END of your response, append the command: [SET_LANG: xx] where xx is the ISO code (tr, en, de, it, zh).
+Example: "Benvenuto! Come posso aiutarla oggi? [SET_LANG: it]"
+
 GİRİŞ: Start the conversation with: "${t("greeting")}"
 
 NAVIGATION & SPOTLIGHT:
-When you talk about a topic, use words related to that section.
-- About Us/Company: Mention "About Us" or "History" to highlight the main section.
-- Products: Mention "Products" or specific items like "T-shirts", "Hoodies", "Polo" to highlight Products.
-- Process: Mention "Production process", "Manufacturing", "Quality Control" for the Process section.
-- Clients: Mention "Our clients" or "Partners".
-- Contact: Mention "Contact us" or "Location".
-- Social Responsibility: Mention "Sustainability" or "Environment".
+Include keywords to trigger navigation when relevant.
+- About Us: mention "About Us" or "History".
+- Products: mention "Products", "T-shirts", "Polo".
+- Process: mention "Production process" or "Manufacturing".
+- Clients: mention "Our clients".
+- Contact: mention "Contact us".
+- Social Responsibility: mention "Sustainability".
 
-STYLE: Professional, visionary, expert in Textile and Ready-to-Wear (Konfeksiyon).
-Use terms like "Örme Kumaş" (Jersey), "Fason Üretim", "Numune Üretimi", "Tedarik Zinciri Management".
+STYLE: Professional, visionery, textile industry expert.
 `;
   }, [locale, t]);
 
