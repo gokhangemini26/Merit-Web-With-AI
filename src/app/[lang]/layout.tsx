@@ -23,6 +23,12 @@ export const metadata: Metadata = {
   icons: { icon: "/seo/favicon.png" },
 };
 
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+};
+
 import { SpotlightProvider } from "@/components/SpotlightProvider";
 
 export default async function RootLayout({
@@ -43,6 +49,30 @@ export default async function RootLayout({
 
   return (
     <html lang={lang} className={`h-full ${poppins.variable}`}>
+      <head>
+        <style>{`
+          @media (max-width: 1024px) {
+            .lg\\:hidden, .lg-hidden { display: none !important; }
+            .mobile-flex { display: flex !important; }
+            .mobile-col { flex-direction: column !important; }
+            .process-row { flex-direction: column !important; align-items: center !important; gap: 32px !important; }
+            .process-card { width: 100% !important; max-width: 320px !important; margin-bottom: 20px; }
+            .process-arrow { display: none !important; }
+            .clients-grid { grid-template-columns: 1fr !important; gap: 20px !important; }
+            .merit-nav-desktop { display: none !important; }
+            .hamburger-btn { display: flex !important; }
+            .merit-header { height: auto !important; padding-bottom: 15px !important; }
+            .footer-row { flex-direction: column !important; align-items: center !important; gap: 20px !important; }
+            .footer-divider { display: none !important; }
+          }
+          @media (min-width: 1025px) {
+            .mobile-only { display: none !important; }
+            .lg-flex { display: flex !important; }
+          }
+          body { overflow-x: hidden !important; width: 100% !important; }
+          html { overflow-x: hidden !important; }
+        `}</style>
+      </head>
       <body className="min-h-full">
         <NextIntlClientProvider messages={messages} locale={lang}>
           <SpotlightProvider>

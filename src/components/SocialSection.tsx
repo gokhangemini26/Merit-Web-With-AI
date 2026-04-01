@@ -1,8 +1,18 @@
+"use client";
+
+import { useTranslations } from "next-intl";
 import { PageTitle } from "@/components/PageTitle";
+import { useSpotlight } from "@/components/SpotlightProvider";
 
 export function SocialSection() {
+  const t = useTranslations("social");
+  const { highlightId } = useSpotlight();
+  const isHighlighted = highlightId === "social";
+
   return (
     <section
+      id="social"
+      className={isHighlighted ? "relative z-[90] transition-all duration-500" : ""}
       style={{
         maxWidth: 570,
         margin: "0 auto",
@@ -12,7 +22,12 @@ export function SocialSection() {
         alignItems: "center",
       }}
     >
-      <PageTitle title="SOCIAL RESPONSIBILITY" />
+      <style>{`
+        @media (max-width: 640px) {
+          .badges-row { flex-direction: column !important; gap: 32px !important; }
+        }
+      `}</style>
+      <PageTitle title={t("title")} />
       <div>
         <p
           style={{
@@ -25,7 +40,7 @@ export function SocialSection() {
             fontFamily: "var(--font-poppins), Poppins, Arial, sans-serif",
           }}
         >
-          We maintain full compliance with all applicable government regulations as well as our clients&apos; specific requirements. We are BSCI-certified(Grade A) and frequently collaborate with independent third-party quality assurance companies to continuously enhance our product quality and operational standards.
+          {t("desc1")}
         </p>
         <p
           style={{
@@ -38,10 +53,11 @@ export function SocialSection() {
             fontFamily: "var(--font-poppins), Poppins, Arial, sans-serif",
           }}
         >
-          We are also GOTS-certified, ensuring that our organic cotton is sourced and processed according to the highest ethical and environmental standards — from seed to stitch, and ultimately to the finished product.
+          {t("desc2")}
         </p>
       </div>
       <div
+        className="badges-row"
         style={{
           display: "flex",
           flexDirection: "row",

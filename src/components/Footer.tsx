@@ -1,113 +1,54 @@
 export function Footer() {
   return (
-    <footer
-      style={{
-        paddingTop: "30px",
-        paddingBottom: "20px",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        gap: "20px",
-      }}
-    >
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: "8px",
-            padding: "0 32px",
-            color: "#ffffff",
-            fontSize: "13px",
-            fontWeight: 400,
-          }}
-        >
+    <footer className="py-8 lg:py-[30px] flex flex-col items-center gap-6 lg:gap-5 w-full bg-transparent px-4">
+      <div className="mobile-col flex flex-row items-center justify-center gap-8 lg:gap-0 w-full max-w-[1200px]">
+        {/* Location */}
+        <div className="flex flex-col items-center gap-2 lg:px-8 text-white text-[13px]">
           <img
             src="/images/icons/pin.png"
-            alt=""
-            style={{ width: "20px", height: "20px", objectFit: "contain" }}
+            alt="Location"
+            className="w-5 h-5 object-contain opacity-80"
           />
           <span>Istanbul, Turkey</span>
         </div>
-        <div
-          style={{
-            width: "1px",
-            height: "40px",
-            backgroundColor: "rgba(255,255,255,0.5)",
-          }}
-        />
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: "8px",
-            padding: "0 32px",
-            color: "#ffffff",
-            fontSize: "13px",
-            fontWeight: 400,
-          }}
-        >
+
+        {/* Divider */}
+        <div className="lg-hidden hidden lg:block w-[1px] h-10 bg-white/30" />
+
+        {/* Email */}
+        <div className="flex flex-col items-center gap-2 lg:px-8 text-white text-[13px]">
           <img
             src="/images/icons/email.png"
-            alt=""
-            style={{ width: "24px", height: "20px", objectFit: "contain" }}
+            alt="Email"
+            className="w-6 h-5 object-contain opacity-80"
           />
           <a
             href="mailto:contact@meritteks.com"
-            style={{ color: "#ffffff", textDecoration: "none", fontSize: "13px" }}
+            className="text-white hover:text-[#f0d5d5] transition-colors"
           >
             contact@meritteks.com
           </a>
         </div>
-        <div
-          style={{
-            width: "1px",
-            height: "40px",
-            backgroundColor: "rgba(255,255,255,0.5)",
-          }}
-        />
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: "8px",
-            padding: "0 32px",
-            color: "#ffffff",
-            fontSize: "13px",
-            fontWeight: 400,
-          }}
-        >
+
+        {/* Divider */}
+        <div className="lg-hidden hidden lg:block w-[1px] h-10 bg-white/30" />
+
+        {/* Phone */}
+        <div className="flex flex-col items-center gap-2 lg:px-8 text-white text-[13px]">
           <img
             src="/images/icons/phone.png"
-            alt=""
-            style={{ width: "19px", height: "20px", objectFit: "contain" }}
+            alt="Phone"
+            className="w-[19px] h-5 object-contain opacity-80"
           />
           <span>+90 216 425 71 46</span>
         </div>
       </div>
-      <p
-        style={{
-          position: "fixed",
-          bottom: "8px",
-          left: "16px",
-          fontSize: "13px",
-          fontWeight: 400,
-          color: "#ffffff",
-          margin: 0,
-        }}
-      >
-        © 2026 Merit. All rights reserved.
-      </p>
+
+      <div className="w-full text-center lg:text-left lg:fixed lg:bottom-2 lg:left-4 py-4 lg:py-0">
+        <p className="text-[12px] lg:text-[13px] text-white/60">
+          © {new Date().getFullYear()} Merit Textile LTD. All rights reserved.
+        </p>
+      </div>
     </footer>
   );
 }

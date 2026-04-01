@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import { PageTitle } from "@/components/PageTitle";
 import { useSpotlight } from "@/components/SpotlightProvider";
+import { useEffect } from "react";
 
 export function ProductsSection() {
   const t = useTranslations("products");
@@ -39,6 +40,12 @@ export function ProductsSection() {
   const prev = () => setCurrent((i: number) => (i === 0 ? slides.length - 1 : i - 1));
   const next = () => setCurrent((i: number) => (i === slides.length - 1 ? 0 : i + 1));
 
+  useEffect(() => {
+    const handleNext = () => next();
+    window.addEventListener("merit:next-product", handleNext);
+    return () => window.removeEventListener("merit:next-product", handleNext);
+  }, [next]);
+
   const slide = slides[current];
 
   return (
@@ -54,6 +61,14 @@ export function ProductsSection() {
         alignItems: "center",
       }}
     >
+      <style>{`
+        @media (max-width: 640px) {
+          .carousel { gap: 8px !important; }
+          .carousel button { font-size: 24px !important; padding: 0 4px !important; }
+          .slide-inner img { width: 150px !important; height: auto !important; }
+          .slide { padding: 12px !important; }
+        }
+      `}</style>
       <PageTitle title={t("title")} />
       <p
         style={{

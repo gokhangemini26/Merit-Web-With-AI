@@ -41,97 +41,29 @@ export function ProcessSection() {
         alignItems: "center",
       }}
     >
-      <style>{`
-        @media (max-width: 768px) {
-          .process-cards-row { flex-direction: column; align-items: center; }
-          .process-arrow { display: none; }
-        }
-      `}</style>
       <PageTitle title={t("title")} />
-      <p
-        style={{
-          fontSize: 18,
-          fontWeight: 600,
-          color: "#ffffff",
-          textAlign: "center",
-          lineHeight: 1.7,
-          maxWidth: 480,
-          marginBottom: 48,
-          fontFamily: "var(--font-poppins), Poppins, Arial, sans-serif",
-        }}
-      >
+      <p className="text-lg font-semibold text-white text-center leading-relaxed max-w-[480px] mb-12 font-[var(--font-poppins)]">
         {t("desc")}
       </p>
-      <div
-        className="process-cards-row"
-        style={{
-          display: "flex",
-          flexDirection: "row",
-          alignItems: "flex-start",
-          justifyContent: "center",
-          width: "100%",
-        }}
-      >
+      
+      <div className="process-row flex flex-row items-start justify-center w-full">
         {cards.map((card, index) => (
           <React.Fragment key={card.title}>
-            <div
-              style={{
-                width: 270,
-                border: "1px solid rgba(255,255,255,0.3)",
-                borderRadius: 8,
-                padding: "24px 20px",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                gap: 12,
-              }}
-            >
+            <div className="process-card border border-white/30 rounded-lg p-6 flex flex-col items-center gap-3 transition-transform hover:scale-105 bg-white/5 backdrop-blur-sm">
               <img
                 src={card.icon}
                 alt={card.title}
-                style={{
-                  width: 40,
-                  height: 40,
-                  objectFit: "contain",
-                  marginBottom: 8,
-                }}
+                className="w-10 h-10 object-contain mb-2"
               />
-              <div
-                style={{
-                  fontSize: 14,
-                  fontWeight: 700,
-                  color: "#ffffff",
-                  textTransform: "uppercase",
-                  letterSpacing: 1,
-                  textAlign: "center",
-                }}
-              >
+              <div className="text-[14px] font-bold text-white uppercase tracking-wider text-center">
                 {card.title}
               </div>
-              <div
-                style={{
-                  fontSize: 15,
-                  fontWeight: 400,
-                  color: "#ffffff",
-                  textAlign: "center",
-                  lineHeight: 1.6,
-                }}
-              >
+              <div className="text-[15px] font-normal text-white/80 text-center leading-relaxed">
                 {card.description}
               </div>
             </div>
             {index < cards.length - 1 && (
-              <div
-                className="process-arrow"
-                style={{
-                  color: "#ffffff",
-                  fontSize: 24,
-                  display: "flex",
-                  alignItems: "center",
-                  padding: "60px 16px 0",
-                  opacity: 0.7,
-                }}
-              >
+              <div className="process-arrow lg-flex text-white text-2xl items-center px-4 pt-16 opacity-50">
                 →
               </div>
             )}

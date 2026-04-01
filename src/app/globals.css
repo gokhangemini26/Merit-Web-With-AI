@@ -128,6 +128,8 @@
   }
   html {
     @apply font-sans;
+    overflow-x: hidden;
+    scroll-behavior: smooth;
   }
 }
 
@@ -138,6 +140,26 @@ body {
   font-family: 'Poppins', Arial, Helvetica, sans-serif;
   margin: 0;
   padding: 0;
+  overflow-x: hidden;
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .merit-title {
+    font-size: 24px !important;
+    letter-spacing: 1px !important;
+  }
+  .merit-divider {
+    width: 160px !important;
+  }
+  .merit-body {
+    font-size: 15px !important;
+    line-height: 1.6 !important;
+  }
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
 }
 
 .merit-page {
@@ -185,4 +207,40 @@ body {
 
 .merit-nav-link.active {
   color: #f0d5d5;
+}
+/* Mobile-only visibility and stacking helpers */
+@media (max-width: 1024px) {
+  .lg-hidden { display: none !important; }
+  .mobile-only { display: block !important; }
+  .mobile-flex { display: flex !important; }
+  .mobile-col { flex-direction: column !important; }
+  
+  .process-row { flex-direction: column !important; align-items: center !important; gap: 32px !important; }
+  .process-arrow { display: none !important; }
+  .process-card { width: 100% !important; max-width: 320px !important; }
+  
+  .merit-header { height: auto !important; }
+}
+
+@media (min-width: 1025px) {
+  .mobile-only { display: none !important; }
+  .mobile-flex { display: none !important; }
+  .lg-flex { display: flex !important; }
+}
+
+@media (max-width: 768px) {
+  .clients-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 16px !important; }
+}
+
+@media (max-width: 480px) {
+  .clients-grid { grid-template-columns: 1fr !important; }
+}
+
+/* Universal Layout Tweaks */
+html, body {
+  overflow-x: hidden;
+  max-width: 100%;
+}
+* {
+  box-sizing: border-box;
 }

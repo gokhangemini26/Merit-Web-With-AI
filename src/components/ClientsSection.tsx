@@ -1,4 +1,8 @@
+"use client";
+
+import { useTranslations } from "next-intl";
 import { PageTitle } from "@/components/PageTitle";
+import { useSpotlight } from "@/components/SpotlightProvider";
 
 const clients = [
   { src: "/images/clients/ermenegildo-zegna.png", alt: "Ermenegildo Zegna" },
@@ -13,8 +17,14 @@ const clients = [
 ];
 
 export function ClientsSection() {
+  const t = useTranslations("clients");
+  const { highlightId } = useSpotlight();
+  const isHighlighted = highlightId === "clients";
+
   return (
     <section
+      id="clients"
+      className={isHighlighted ? "relative z-[90] transition-all duration-500" : ""}
       style={{
         maxWidth: 960,
         margin: "0 auto",
@@ -24,58 +34,21 @@ export function ClientsSection() {
         alignItems: "center",
       }}
     >
-      <style>{`
-        @media (max-width: 640px) {
-          .clients-grid { grid-template-columns: repeat(2, 1fr) !important; }
-        }
-        @media (max-width: 400px) {
-          .clients-grid { grid-template-columns: 1fr !important; }
-        }
-      `}</style>
-      <PageTitle title="CLIENTS" />
-      <div
-        style={{
-          fontSize: 18,
-          fontWeight: 400,
-          color: "#ffffff",
-          textAlign: "center",
-          lineHeight: 1.7,
-          marginBottom: 48,
-          fontFamily: "var(--font-poppins), Poppins, Arial, sans-serif",
-        }}
-      >
-        <p>You&apos;re in good company.</p>
-        <p>Trusted by the world&apos;s leading clothing retailers.</p>
+      <PageTitle title={t("title")} />
+      <div className="text-base lg:text-lg font-normal text-white text-center leading-relaxed mb-12 font-[var(--font-poppins)]">
+        <p>{t("desc1")}</p>
+        <p>{t("desc2")}</p>
       </div>
-      <div
-        className="clients-grid"
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(3, 1fr)",
-          gap: "40px 60px",
-          width: "100%",
-          maxWidth: 900,
-        }}
-      >
+      <div className="clients-grid grid grid-cols-3 w-full max-w-[900px]">
         {clients.map((client) => (
           <div
             key={client.alt}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              minHeight: 100,
-            }}
+            className="flex items-center justify-center min-h-[100px]"
           >
             <img
               src={client.src}
               alt={client.alt}
-              style={{
-                maxWidth: 200,
-                maxHeight: 100,
-                objectFit: "contain",
-                filter: "brightness(0) invert(1)",
-              }}
+              className="max-w-[160px] max-h-[100px] object-contain brightness-0 invert opacity-80 hover:opacity-100 transition-opacity"
             />
           </div>
         ))}

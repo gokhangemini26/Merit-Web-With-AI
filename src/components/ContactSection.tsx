@@ -1,10 +1,18 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { PageTitle } from "@/components/PageTitle";
+import { useSpotlight } from "@/components/SpotlightProvider";
 
 export function ContactSection() {
+  const t = useTranslations("contact");
+  const { highlightId } = useSpotlight();
+  const isHighlighted = highlightId === "contact";
+
   return (
     <section
+      id="contact"
+      className={isHighlighted ? "relative z-[90] transition-all duration-500" : ""}
       style={{
         maxWidth: 520,
         margin: "0 auto",
@@ -31,8 +39,11 @@ export function ContactSection() {
         .merit-input::placeholder {
           color: rgba(255,255,255,0.5);
         }
+        @media (max-width: 640px) {
+          .submit-btn { align-self: center !important; width: 100% !important; }
+        }
       `}</style>
-      <PageTitle title="CONTACT" />
+      <PageTitle title={t("title")} />
       <div
         style={{
           fontSize: 18,
@@ -43,23 +54,24 @@ export function ContactSection() {
           lineHeight: 1.7,
         }}
       >
-        <p>Let&apos;s get in touch.</p>
-        <p>Send us a message or give us a call.</p>
+        <p>{t("desc1")}</p>
+        <p>{t("desc2")}</p>
       </div>
       <form
         style={{ width: "100%", display: "flex", flexDirection: "column", gap: 12 }}
         onSubmit={(e) => e.preventDefault()}
       >
-        <input className="merit-input" placeholder="Name" />
-        <input className="merit-input" placeholder="Email" />
-        <input className="merit-input" placeholder="Phone" />
+        <input className="merit-input" placeholder={t("placeholders.name")} />
+        <input className="merit-input" placeholder={t("placeholders.email")} />
+        <input className="merit-input" placeholder={t("placeholders.phone")} />
         <textarea
           className="merit-input"
-          placeholder="Type your message here.."
+          placeholder={t("placeholders.message")}
           style={{ minHeight: 100, resize: "vertical" }}
         />
         <button
           type="submit"
+          className="submit-btn"
           style={{
             backgroundColor: "#ffffff",
             color: "#002e5d",
@@ -73,7 +85,7 @@ export function ContactSection() {
             marginTop: 4,
           }}
         >
-          Submit
+          {t("submit")}
         </button>
       </form>
       <div

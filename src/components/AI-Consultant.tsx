@@ -251,7 +251,20 @@ STYLE: Professional, visionery, textile industry expert.
       },
       onTranscription: (text, isUser) => {
         setTranscriptions(prev => [...prev.slice(-4), { text, isUser }]);
-        if (text) detectAndNavigate(text);
+        if (text) {
+          detectAndNavigate(text);
+          
+          // Trigger Carousel sliding if bot mentions products
+          if (!isUser && /aşağıda ürettiğimiz bazı ürünleri|see some of the products|sehen sie einige der produkte|vedere alcuni dei prodotti|下面您可以看到/.test(text.toLowerCase())) {
+            // Slide a few times for demonstration
+            let count = 0;
+            const interval = setInterval(() => {
+              window.dispatchEvent(new CustomEvent("merit:next-product"));
+              count++;
+              if (count >= 3) clearInterval(interval);
+            }, 3000);
+          }
+        }
       },
       onInterrupted: () => {
         addDebug("Interrupted by user");
@@ -276,18 +289,38 @@ STYLE: Professional, visionery, textile industry expert.
 
   return (
     <>
-      <div className="fixed bottom-6 right-6 z-[100] flex flex-col items-end gap-4">
+      <style jsx global>{`
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
+        
+        @media (max-width: 640px) {
+          .consultant-modal { padding: 32px 20px !important; border-radius: 0 !important; width: 100% !important; height: 100% !important; max-width: none !important; }
+          .consultant-modal h2 { font-size: 20px !important; margin-bottom: 12px !important; }
+          .consultant-modal p { font-size: 14px !important; margin-bottom: 24px !important; }
+          .consultant-modal .logo-img { h: 50px !important; margin-bottom: 20px !important; }
+          .consultant-modal button { font-size: 15px !important; padding: 14px 20px !important; }
+          
+          .floating-btn-container { bottom: 20px !important; right: 20px !important; }
+          .consultant-btn { height: 48px !important; width: 48px !important; }
+          .chat-bubble { width: calc(100vw - 40px) !important; bottom: 80px !important; right: 20px !important; }
+        }
+        
+        body { padding-bottom: 120px !important; }
+      `}</style>
+
+      <div className="floating-btn-container fixed bottom-6 right-6 z-[1000] flex flex-col items-end gap-4">
         <AnimatePresence>
           {isLive && (
-            <motion.div initial={{ opacity: 0, scale: 0.8, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.8, y: 20 }} className="bg-[#002e5d]/90 backdrop-blur-md p-4 rounded-2xl border border-white/20 shadow-2xl w-80 mb-2">
+            <motion.div initial={{ opacity: 0, scale: 0.8, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.8, y: 20 }} className="chat-bubble bg-[#002e5d]/95 backdrop-blur-xl p-4 rounded-2xl border border-white/20 shadow-2xl w-80 mb-2">
               <div className="flex items-center justify-between mb-3 border-b border-white/10 pb-2">
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
                   <span className="text-[10px] font-bold text-white uppercase tracking-widest">LIVE AI ASSISTANT</span>
                 </div>
-                <button onClick={toggleLive} className="text-white/50 hover:text-white"><X size={14} /></button>
+                <button onClick={toggleLive} style={{ cursor: 'pointer' }} className="text-white/50 hover:text-white p-1"><X size={16} /></button>
               </div>
-              <div className="space-y-3 max-h-40 overflow-y-auto pr-2 custom-scrollbar">
+              <div className="space-y-3 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
                 {transcriptions.map((tr, i) => (
                   <div key={i} className={`flex flex-col ${tr.isUser ? 'items-end' : 'items-start'}`}>
                     <span className="text-[9px] text-white/40 mb-1 uppercase tracking-tighter">{tr.isUser ? 'You' : 'Merit AI'}</span>
@@ -304,14 +337,20 @@ STYLE: Professional, visionery, textile industry expert.
         <div className="flex items-center gap-3">
           <AnimatePresence>
             {!isLive && !isWelcomeVisible && (
-              <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} className="bg-white text-[#002e5d] px-4 py-2 rounded-full text-xs font-bold shadow-lg border border-[#002e5d]/10">
+              <motion.div 
+                initial={{ opacity: 0, x: 20 }} 
+                animate={{ opacity: 1, x: 0 }} 
+                exit={{ opacity: 0, x: 20 }} 
+                className="bg-white text-[#002e5d] px-4 py-2 rounded-full text-xs font-bold shadow-lg border border-[#002e5d]/10"
+              >
                 {t("btnChat")}
               </motion.div>
             )}
           </AnimatePresence>
           <button 
             onClick={() => isLive ? toggleLive() : setIsWelcomeVisible(true)} 
-            className={`group h-14 w-14 rounded-full flex items-center justify-center transition-all shadow-2xl hover:scale-110 active:scale-95 relative ${isLive ? 'bg-red-600' : 'bg-[#002e5d]'}`}
+            style={{ cursor: 'pointer' }}
+            className={`consultant-btn group h-14 w-14 rounded-full flex items-center justify-center transition-all shadow-2xl hover:scale-110 active:scale-95 relative ${isLive ? 'bg-red-600' : 'bg-[#002e5d]'}`}
           >
             {isLive ? <Square className="text-white w-5 h-5 fill-current" /> : <Languages className="text-white w-6 h-6" />}
             {isLive && <motion.div animate={{ scale: [1, 1.5, 1], opacity: [0.5, 0, 0.5] }} transition={{ repeat: Infinity, duration: 2 }} className="absolute inset-0 rounded-full bg-red-500 -z-10" />}
@@ -321,20 +360,27 @@ STYLE: Professional, visionery, textile industry expert.
 
       <AnimatePresence>
         {isWelcomeVisible && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[110] flex items-center justify-center bg-[#002e5d] p-6">
-            <div className="bg-white/5 backdrop-blur-xl p-10 rounded-[40px] border border-white/10 max-w-xl w-full text-center shadow-[0_0_100px_rgba(0,0,0,0.5)]">
-              <motion.img initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} src={LOGO_URL} className="h-16 mx-auto mb-8 brightness-0 invert" />
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[2000] flex items-center justify-center bg-[#002e5d] p-0 overflow-hidden">
+            <div className="consultant-modal bg-white/5 backdrop-blur-3xl p-10 rounded-[40px] border border-white/10 max-w-xl w-full text-center shadow-[0_0_100px_rgba(0,0,0,0.5)] flex flex-col items-center justify-center">
+              <motion.img initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} src={LOGO_URL} className="logo-img h-16 mx-auto mb-8 brightness-0 invert" />
               <h2 className="text-3xl font-bold mb-4 text-white uppercase tracking-tight">{t("welcomeTitle")}</h2>
               <p className="text-white/60 mb-10 text-lg leading-relaxed font-light">{t("welcomeDesc")}</p>
               
-              <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-4 w-full px-6">
                 <button 
                   onClick={() => { setIsWelcomeVisible(false); toggleLive(); }} 
+                  style={{ cursor: 'pointer' }}
                   className="bg-[#e63946] text-white px-8 py-5 rounded-full text-lg font-bold flex items-center justify-center gap-3 hover:bg-red-700 transition-all shadow-xl hover:shadow-red-900/40"
                 >
                   {isConnecting ? t("btnConnecting") : t("welcomeBtn")} <ArrowRight className="w-5 h-5" />
                 </button>
-                <button onClick={() => setIsWelcomeVisible(false)} className="text-white/40 hover:text-white text-sm transition-colors uppercase tracking-widest font-bold">Maybe later</button>
+                <button 
+                  onClick={() => setIsWelcomeVisible(false)} 
+                  style={{ cursor: 'pointer' }}
+                  className="text-white/40 hover:text-white text-sm transition-colors uppercase tracking-widest font-bold mt-2"
+                >
+                  {t("maybeLater") || "Maybe later"}
+                </button>
               </div>
               
               {showPermissionError && (<p className="text-red-400 mt-6 text-sm bg-red-400/10 p-3 rounded-xl border border-red-400/20">{permissionErrorMessage}</p>)}
@@ -342,12 +388,6 @@ STYLE: Professional, visionery, textile industry expert.
           </motion.div>
         )}
       </AnimatePresence>
-
-      <style jsx global>{`
-        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
-      `}</style>
     </>
   );
 }
