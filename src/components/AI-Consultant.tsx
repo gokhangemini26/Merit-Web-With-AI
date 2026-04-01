@@ -223,7 +223,7 @@ User: "Show me products in Turkish"
 You: (Action: call change_language(locale: 'tr') and navigate_to(page: 'products'))
 Response: "Tabii ki, işte yüksek kaliteli ürünlerimizi bulabileceğiniz sayfamız."
  
-GİRİŞ: Start with: "${t("greeting")}"
+GİRİŞ: "Başla" komutunu aldığında, kullanıcıya HEMEN şu cümleyle başla: "${t("greeting")}"
 `;
   }, [locale, t]);
 

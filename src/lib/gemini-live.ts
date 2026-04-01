@@ -23,11 +23,11 @@ export class GeminiLiveClient {
 
   async connect() {
     this.session = await this.ai.live.connect({
-      model: "gemini-2.0-flash-exp",
+      model: "gemini-3.1-flash-live-preview",
       config: {
         responseModalities: [Modality.AUDIO],
         speechConfig: {
-          voiceConfig: { prebuiltVoiceConfig: { voiceName: "Puck" } },
+          voiceConfig: { prebuiltVoiceConfig: { voiceName: "Zephyr" } },
         },
         systemInstruction: this.config.systemInstruction || "You are a helpful assistant.",
         tools: this.config.tools || [],
@@ -91,12 +91,12 @@ export class GeminiLiveClient {
             }
           }
         },
-        onerror: (error) => {
-          console.error("Gemini Live error:", error);
+        onerror: (error: any) => {
+          console.error("[GeminiLive] WebSocket error:", error);
           this.config.onError?.(error);
         },
-        onclose: () => {
-          console.log("Gemini Live closed");
+        onclose: (event?: any) => {
+          console.log("[GeminiLive] WebSocket closed. Code:", event?.code, "Reason:", event?.reason);
           this.config.onClose?.();
         },
       },
