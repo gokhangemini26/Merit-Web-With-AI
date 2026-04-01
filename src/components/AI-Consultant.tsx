@@ -248,24 +248,27 @@ export function AIConsultant() {
       return;
     }
 
-    setIsConnecting(true);
     addDebug("Connecting to Gemini...");
+
+    // 1. Get Key (Check URL param first for debugging, then Env Var)
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlKey = urlParams.get('key');
+    const apiKey = urlKey || process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+
+    if (!apiKey || apiKey === "undefined" || apiKey === "null") {
+      addDebug("API Key Missing (Client-side)");
+      setPermissionErrorMessage("API Key bulunamadı. Vercel'de NEXT_PUBLIC_GEMINI_API_KEY değişkenini ayarladığınızdan ve yeni bir build aldığınızdan emin olun.");
+      setShowPermissionError(true);
+      audioStream.getTracks().forEach(t => t.stop());
+      setIsConnecting(false);
+      return;
+    }
 
     try {
       const audioContext = getAudioContext();
       if (audioContext.state === 'suspended') await audioContext.resume();
     } catch (err: any) {
       addDebug(`Audio Error: ${err.message}`);
-      audioStream.getTracks().forEach(t => t.stop());
-      setIsConnecting(false);
-      return;
-    }
-
-    const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
-    if (!apiKey) {
-      addDebug("API Key Missing");
-      setPermissionErrorMessage("API Key bulunamadı (Vercel Settings -> Environment Variables).");
-      setShowPermissionError(true);
       audioStream.getTracks().forEach(t => t.stop());
       setIsConnecting(false);
       return;
