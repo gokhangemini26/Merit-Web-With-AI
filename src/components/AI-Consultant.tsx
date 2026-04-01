@@ -36,10 +36,21 @@ export function AIConsultant() {
   const audioQueueRef = useRef<string[]>([]);
   const isPlayingRef = useRef(false);
   const pendingAudioStreamRef = useRef<MediaStream | null>(null);
+  const activeSourceRef = useRef<AudioBufferSourceNode | null>(null);
 
   const addDebug = (msg: string) => {
     console.log(`[AIConsultant] ${msg}`);
   };
+
+  const stopActiveAudio = useCallback(() => {
+    if (activeSourceRef.current) {
+      try {
+        activeSourceRef.current.stop();
+      } catch (e) {}
+      activeSourceRef.current = null;
+    }
+    isPlayingRef.current = false;
+  }, []);
 
   // --- Auto-open after 1s ---
   useEffect(() => {
@@ -77,7 +88,12 @@ export function AIConsultant() {
     source.buffer = buffer;
     source.connect(audioContext.destination);
     
+    activeSourceRef.current = source;
+    
     source.onended = () => {
+      if (activeSourceRef.current === source) {
+        activeSourceRef.current = null;
+      }
       isPlayingRef.current = false;
       playNextAudio();
     };
@@ -236,6 +252,11 @@ STYLE: Professional, visionery, textile industry expert.
       onTranscription: (text, isUser) => {
         setTranscriptions(prev => [...prev.slice(-4), { text, isUser }]);
         if (text) detectAndNavigate(text);
+      },
+      onInterrupted: () => {
+        addDebug("Interrupted by user");
+        audioQueueRef.current = [];
+        stopActiveAudio();
       },
       onClose: () => setIsLive(false),
       onError: (err) => addDebug(`Error: ${err.message}`)
