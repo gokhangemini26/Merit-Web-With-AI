@@ -2,8 +2,10 @@ import { GoogleGenAI, LiveServerMessage, Modality } from "@google/genai";
 
 export interface GeminiLiveConfig {
   systemInstruction?: string;
+  tools?: any[];
   onAudioData?: (data: string) => void;
   onTranscription?: (text: string, isUser: boolean) => void;
+  onToolCall?: (functionCalls: any[]) => void;
   onInterrupted?: () => void;
   onError?: (error: any) => void;
   onClose?: () => void;
@@ -21,13 +23,14 @@ export class GeminiLiveClient {
 
   async connect() {
     this.session = await this.ai.live.connect({
-      model: "gemini-3.1-flash-live-preview",
+      model: "gemini-2.0-flash-exp",
       config: {
         responseModalities: [Modality.AUDIO],
         speechConfig: {
-          voiceConfig: { prebuiltVoiceConfig: { voiceName: "Zephyr" } },
+          voiceConfig: { prebuiltVoiceConfig: { voiceName: "Puck" } },
         },
         systemInstruction: this.config.systemInstruction || "You are a helpful assistant.",
+        tools: this.config.tools || [],
         outputAudioTranscription: {},
         inputAudioTranscription: {},
       },
@@ -77,6 +80,16 @@ export class GeminiLiveClient {
             console.log("[GeminiLive] USER transcription:", inTranscript);
             this.config.onTranscription?.(inTranscript, true);
           }
+
+          // 5. Tool Calls (Function Calling)
+          if (msg.toolCall || msg.serverContent?.modelTurn?.parts?.some((p: any) => p.functionCall)) {
+            const calls = msg.toolCall?.functionCalls || 
+                        msg.serverContent?.modelTurn?.parts?.filter((p: any) => p.functionCall).map((p: any) => p.functionCall);
+            if (calls && calls.length > 0) {
+              console.log("[GeminiLive] Tool Call:", calls);
+              this.config.onToolCall?.(calls);
+            }
+          }
         },
         onerror: (error) => {
           console.error("Gemini Live error:", error);
@@ -110,6 +123,12 @@ export class GeminiLiveClient {
   sendText(text: string) {
     if (this.session) {
       this.session.sendRealtimeInput({ text });
+    }
+  }
+
+  sendToolResponse(functionResponses: any[]) {
+    if (this.session) {
+      this.session.sendToolResponse({ functionResponses });
     }
   }
 

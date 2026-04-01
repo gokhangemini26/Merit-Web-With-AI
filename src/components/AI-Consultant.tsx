@@ -10,6 +10,43 @@ import { usePathname, useRouter, Link } from "@/i18n/routing";
 import { useTranslations, useLocale } from "next-intl";
 import { useSpotlight } from "@/components/SpotlightProvider";
 
+const TOOLS = [
+  {
+    functionDeclarations: [
+      {
+        name: "navigate_to",
+        description: "Navigates the website to a specific section or page (About, Products, Process, Clients, Contact, Social Responsibility).",
+        parameters: {
+          type: "object",
+          properties: {
+            page: { 
+              type: "string", 
+              enum: ["about", "products", "process", "clients", "contact", "social"],
+              description: "The target section or page name." 
+            }
+          },
+          required: ["page"]
+        }
+      },
+      {
+        name: "change_language",
+        description: "Changes the website language to a different locale (tr, en, de, it, zh).",
+        parameters: {
+          type: "object",
+          properties: {
+            locale: { 
+              type: "string", 
+              enum: ["tr", "en", "de", "it", "zh"],
+              description: "The target ISO language code." 
+            }
+          },
+          required: ["locale"]
+        }
+      }
+    ]
+  }
+];
+
 const LOGO_URL = "/images/logo.png";
 
 export function AIConsultant() {
@@ -129,79 +166,64 @@ export function AIConsultant() {
     }
   };
 
-  const detectAndNavigate = useCallback((text: string) => {
-    const t = text.toLowerCase();
+  const handleToolCall = useCallback((functionCalls: any[]) => {
+    const responses: any[] = [];
     
-    // 1. Handle Language Switch Command from AI
-    const langMatch = t.match(/\[set_lang:\s*(tr|en|de|it|zh)\]/i);
-    if (langMatch && langMatch[1]) {
-      const newLang = langMatch[1].toLowerCase();
-      if (newLang !== locale) {
-        // Redirect to same path but different locale
-        const newPath = pathname; 
-        router.push(newPath as any, { locale: newLang });
-        return;
-      }
-    }
+    functionCalls.forEach(call => {
+      const { name, args, id } = call;
+      addDebug(`Tool Call: ${name} with ${JSON.stringify(args)}`);
 
-    let targetSection: string | null = null;
-    let targetPath: string | null = null;
+      if (name === "change_language") {
+        const newLang = args.locale.toLowerCase();
+        if (newLang !== locale) {
+          router.push(pathname as any, { locale: newLang });
+        }
+        responses.push({ id, name, response: { success: true, message: `Language changed to ${newLang}` } });
+      } else if (name === "navigate_to") {
+        const page = args.page.toLowerCase();
+        let path = "/";
+        let anchor = page;
 
-    if (/hakkımızda|about us|über uns|chi siamo|关于我们/.test(t)) {
-      targetPath = '/';
-      targetSection = 'about';
-    } else if (/ürün|product|produkt|prodotto|产品/.test(t)) {
-      targetPath = '/products';
-      targetSection = 'products';
-    } else if (/süreç|process|prozess|processo|生产工艺|工艺/.test(t)) {
-      targetPath = '/process';
-      targetSection = 'process';
-    } else if (/müşteri|client|kunden|clienti|客户/.test(t)) {
-      targetPath = '/clients';
-      targetSection = 'clients';
-    } else if (/iletişim|contact|kontakt|contatti|联系/.test(t)) {
-      targetPath = '/contact';
-      targetSection = 'contact';
-    } else if (/sosyal|social|sürdürülebilirlik|sustainability|verantwortung|responsabilità|责任|可持续/.test(t)) {
-      targetPath = '/social-responsibility';
-      targetSection = 'social';
-    }
-    
-    if (targetPath) {
-      router.push(targetPath as any);
-      if (targetSection) {
+        if (page === "products") path = "/products";
+        else if (page === "process") path = "/process";
+        else if (page === "clients") path = "/clients";
+        else if (page === "contact") path = "/contact";
+        else if (page === "social") path = "/social-responsibility";
+
+        router.push(path as any);
         setTimeout(() => {
-          setHighlight(targetSection);
-          setTimeout(() => setHighlight(null), 16000); 
+          setHighlight(anchor);
+          setTimeout(() => setHighlight(null), 10000);
         }, 800);
+
+        responses.push({ id, name, response: { success: true, message: `Navigated to ${page}` } });
       }
-    }
+    });
+
+    clientRef.current?.sendToolResponse(responses);
   }, [router, setHighlight, locale, pathname]);
 
   const getSystemInstruction = useCallback(() => {
     return `
 ${t("aiRole")}
-ROLE: You are the Merit Textile AI Consultant. You are polyglot and you MUST respond in the SAME language the user speaks to you.
-SUPPORTED LANGUAGES: Turkish, English, German, Italian, Chinese.
-
-LANGUAGE SWITCHING:
-If the user starts speaking a different language than the current one (${locale}), you MUST:
-1. Respond in that new language.
-2. At the VERY END of your response, append the command: [SET_LANG: xx] where xx is the ISO code (tr, en, de, it, zh).
-Example: "Benvenuto! Come posso aiutarla oggi? [SET_LANG: it]"
-
-GİRİŞ: Start the conversation with: "${t("greeting")}"
-
-NAVIGATION & SPOTLIGHT:
-Include keywords to trigger navigation when relevant.
-- About Us: mention "About Us" or "History".
-- Products: mention "Products", "T-shirts", "Polo".
-- Process: mention "Production process" or "Manufacturing".
-- Clients: mention "Our clients".
-- Contact: mention "Contact us".
-- Social Responsibility: mention "Sustainability".
-
-STYLE: Professional, visionery, textile industry expert.
+ROLE: You are the Merit Textile AI Consultant. You are a polyglot assistant.
+CURRENT STATE: Current Language is ${locale.toUpperCase()}.
+ 
+CONVERSATION RULES:
+1. Speak NATURALLY. Never mention function names, technical commands, or bracketed codes in your speech.
+2. If the user speaks a different language, respond in that language and SIMULTANEOUSLY call the 'change_language' tool.
+3. If the user asks about a section (History, Products, Contact, etc.), respond naturally and CALL the 'navigate_to' tool.
+ 
+TOOLS USAGE:
+- change_language(locale: 'tr'|'en'|'de'|'it'|'zh')
+- navigate_to(page: 'about'|'products'|'process'|'clients'|'social'|'contact')
+ 
+Example Transition:
+User: "Show me products in Turkish"
+You: (Action: call change_language(locale: 'tr') and navigate_to(page: 'products'))
+Response: "Tabii ki, işte yüksek kaliteli ürünlerimizi bulabileceğiniz sayfamız."
+ 
+GİRİŞ: Start with: "${t("greeting")}"
 `;
   }, [locale, t]);
 
@@ -240,6 +262,7 @@ STYLE: Professional, visionery, textile industry expert.
 
     clientRef.current = new GeminiLiveClient(apiKey, {
       systemInstruction: getSystemInstruction(),
+      tools: TOOLS,
       onAudioData: (data) => {
         audioQueueRef.current.push(data);
         playNextAudio();
@@ -251,12 +274,9 @@ STYLE: Professional, visionery, textile industry expert.
       },
       onTranscription: (text, isUser) => {
         setTranscriptions(prev => [...prev.slice(-4), { text, isUser }]);
-        if (text) {
-          detectAndNavigate(text);
-          
+        if (text && !isUser) {
           // Trigger Carousel sliding if bot mentions products
-          if (!isUser && /aşağıda ürettiğimiz bazı ürünleri|see some of the products|sehen sie einige der produkte|vedere alcuni dei prodotti|下面您可以看到/.test(text.toLowerCase())) {
-            // Slide a few times for demonstration
+          if (/aşağıda ürettiğimiz bazı ürünleri|see some of the products|sehen sie einige der produkte|vedere alcuni dei prodotti|下面您可以看到/.test(text.toLowerCase())) {
             let count = 0;
             const interval = setInterval(() => {
               window.dispatchEvent(new CustomEvent("merit:next-product"));
@@ -266,6 +286,7 @@ STYLE: Professional, visionery, textile industry expert.
           }
         }
       },
+      onToolCall: handleToolCall,
       onInterrupted: () => {
         addDebug("Interrupted by user");
         audioQueueRef.current = [];
