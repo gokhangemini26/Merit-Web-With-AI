@@ -47,6 +47,7 @@
     "greeting": "Hello, welcome to Merit Textile. I would be happy to help you.",
     "aiRole": "You are Merit Textile's AI consultant. You provide information about textile production, ready-to-wear, sustainability, and global operations.",
     "indicatorNavigating": "Navigating to",
-    "indicatorShowing": "showing"
+    "indicatorShowing": "showing",
+    "maybeLater": "Maybe later"
   }
 }

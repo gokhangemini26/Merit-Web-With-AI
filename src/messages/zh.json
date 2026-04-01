@@ -44,6 +44,7 @@
     "greeting": "您好，欢迎来到 Merit 纺织。我很高兴为您提供帮助。",
     "aiRole": "您是 Merit 纺织的人工智能顾问。您提供关于纺织品生产、成衣、可持续发展和全球业务的信息。",
     "indicatorNavigating": "正在转到",
-    "indicatorShowing": "正在显示"
+    "indicatorShowing": "正在显示",
+    "maybeLater": "稍后再说"
   }
 }

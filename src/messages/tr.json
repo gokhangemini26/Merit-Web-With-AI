@@ -47,6 +47,7 @@
     "greeting": "Merhaba, Merit Tekstil'e hoş geldiniz. Size yardımcı olmaktan mutluluk duyarım.",
     "aiRole": "Sen Merit Tekstil'in yapay zeka danışmanısın. Tekstil üretimi, konfeksiyon, sürdürülebilirlik ve küresel operasyonlar konularında bilgi veriyorsun.",
     "indicatorNavigating": "Yönlendiriliyorsunuz",
-    "indicatorShowing": "gösteriliyor"
+    "indicatorShowing": "gösteriliyor",
+    "maybeLater": "Belki daha sonra"
   }
 }
