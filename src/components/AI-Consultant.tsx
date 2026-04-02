@@ -75,6 +75,7 @@ export function AIConsultant() {
   const pendingAudioStreamRef = useRef<MediaStream | null>(null);
   const activeSourceRef = useRef<AudioBufferSourceNode | null>(null);
   const inactivityTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const lastInteractionTimeRef = useRef<number>(Date.now());
 
   const addDebug = (msg: string) => {
     console.log(`[AIConsultant] ${msg}`);
@@ -100,20 +101,42 @@ export function AIConsultant() {
   }, []);
 
   const resetInactivityTimer = useCallback(() => {
-    if (inactivityTimeoutRef.current) clearTimeout(inactivityTimeoutRef.current);
-    inactivityTimeoutRef.current = setTimeout(() => {
-      addDebug("Inactivity timeout reached. Disconnecting...");
-      // We check if it's already disconnected to avoid double-firing.
-      // We can't call toggleLive() directly because of state closure, 
-      // but we can set a flag or just force close the client.
-      clientRef.current?.close();
-      setIsLive(false);
-      setIsMicOn(false);
-      setIsConnecting(false);
-      streamRef.current?.getTracks().forEach(t => t.stop());
-      processorRef.current?.disconnect();
-    }, 10000); // 10 seconds
+    lastInteractionTimeRef.current = Date.now();
   }, []);
+
+  // --- Inactivity Monitor Effect ---
+  useEffect(() => {
+    if (!isLive) {
+      if (inactivityTimeoutRef.current) clearInterval(inactivityTimeoutRef.current);
+      return;
+    }
+
+    // Every 500ms, check if we should disconnect
+    const interval = setInterval(() => {
+      const now = Date.now();
+      const diff = now - lastInteractionTimeRef.current;
+
+      // If the bot is currently playing audio, keep the timer reset
+      if (isPlayingRef.current) {
+        resetInactivityTimer();
+        return;
+      }
+
+      if (diff >= 10000) {
+        addDebug(`Inactivity timeout reached (${diff}ms). Disconnecting...`);
+        clientRef.current?.close();
+        setIsLive(false);
+        setIsMicOn(false);
+        setIsConnecting(false);
+        streamRef.current?.getTracks().forEach(t => t.stop());
+        processorRef.current?.disconnect();
+        clearInterval(interval);
+      }
+    }, 500);
+
+    inactivityTimeoutRef.current = interval;
+    return () => clearInterval(interval);
+  }, [isLive, resetInactivityTimer]);
 
   const getAudioContext = useCallback(() => {
     if (!audioContextRef.current) {
@@ -174,7 +197,13 @@ export function AIConsultant() {
         clientRef.current?.sendAudio(base64Data);
         
         const sum = inputData.reduce((a, b) => a + Math.abs(b), 0);
-        setAudioLevel(sum / inputData.length * 5);
+        const level = sum / inputData.length * 5;
+        setAudioLevel(level);
+
+        // If user is speaking (volume > 0.05), reset the timer
+        if (level > 0.05) {
+          resetInactivityTimer();
+        }
       };
       
       source.connect(processor);
@@ -250,7 +279,7 @@ GİRİŞ: "Başla" komutunu aldığında, kullanıcıya HEMEN şu cümleyle baş
 
   const toggleLive = async () => {
     if (isLive) {
-      if (inactivityTimeoutRef.current) clearTimeout(inactivityTimeoutRef.current);
+      if (inactivityTimeoutRef.current) clearInterval(inactivityTimeoutRef.current);
       clientRef.current?.close();
       clientRef.current = null;
       streamRef.current?.getTracks().forEach(t => t.stop());
