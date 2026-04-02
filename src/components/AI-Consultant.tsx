@@ -74,6 +74,7 @@ export function AIConsultant() {
   const isPlayingRef = useRef(false);
   const pendingAudioStreamRef = useRef<MediaStream | null>(null);
   const activeSourceRef = useRef<AudioBufferSourceNode | null>(null);
+  const inactivityTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const addDebug = (msg: string) => {
     console.log(`[AIConsultant] ${msg}`);
@@ -92,7 +93,26 @@ export function AIConsultant() {
   // --- Auto-open after 1s ---
   useEffect(() => {
     const timer = setTimeout(() => setIsWelcomeVisible(true), 1500);
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      if (inactivityTimeoutRef.current) clearTimeout(inactivityTimeoutRef.current);
+    };
+  }, []);
+
+  const resetInactivityTimer = useCallback(() => {
+    if (inactivityTimeoutRef.current) clearTimeout(inactivityTimeoutRef.current);
+    inactivityTimeoutRef.current = setTimeout(() => {
+      addDebug("Inactivity timeout reached. Disconnecting...");
+      // We check if it's already disconnected to avoid double-firing.
+      // We can't call toggleLive() directly because of state closure, 
+      // but we can set a flag or just force close the client.
+      clientRef.current?.close();
+      setIsLive(false);
+      setIsMicOn(false);
+      setIsConnecting(false);
+      streamRef.current?.getTracks().forEach(t => t.stop());
+      processorRef.current?.disconnect();
+    }, 10000); // 10 seconds
   }, []);
 
   const getAudioContext = useCallback(() => {
@@ -201,7 +221,8 @@ export function AIConsultant() {
     });
 
     clientRef.current?.sendToolResponse(responses);
-  }, [router, setHighlight, locale, pathname]);
+    resetInactivityTimer();
+  }, [router, setHighlight, locale, pathname, resetInactivityTimer]);
 
   const getSystemInstruction = useCallback(() => {
     return `
@@ -229,6 +250,7 @@ GİRİŞ: "Başla" komutunu aldığında, kullanıcıya HEMEN şu cümleyle baş
 
   const toggleLive = async () => {
     if (isLive) {
+      if (inactivityTimeoutRef.current) clearTimeout(inactivityTimeoutRef.current);
       clientRef.current?.close();
       clientRef.current = null;
       streamRef.current?.getTracks().forEach(t => t.stop());
@@ -264,6 +286,7 @@ GİRİŞ: "Başla" komutunu aldığında, kullanıcıya HEMEN şu cümleyle baş
       systemInstruction: getSystemInstruction(),
       tools: TOOLS,
       onAudioData: (data) => {
+        resetInactivityTimer();
         audioQueueRef.current.push(data);
         playNextAudio();
         if (pendingAudioStreamRef.current) {
@@ -273,6 +296,7 @@ GİRİŞ: "Başla" komutunu aldığında, kullanıcıya HEMEN şu cümleyle baş
         }
       },
       onTranscription: (text, isUser) => {
+        resetInactivityTimer();
         setTranscriptions(prev => [...prev.slice(-4), { text, isUser }]);
         if (text && !isUser) {
           // Trigger Carousel sliding if bot mentions products
@@ -302,6 +326,7 @@ GİRİŞ: "Başla" komutunu aldığında, kullanıcıya HEMEN şu cümleyle baş
       setIsConnecting(false);
       pendingAudioStreamRef.current = audioStream;
       clientRef.current.triggerGreeting();
+      resetInactivityTimer(); // Start the first 10s window
     } catch (err: any) {
       audioStream.getTracks().forEach(t => t.stop());
       setIsConnecting(false);
