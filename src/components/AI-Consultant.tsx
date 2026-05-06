@@ -193,7 +193,12 @@ export function AIConsultant() {
         const inputData = e.inputBuffer.getChannelData(0);
         const pcmData = new Int16Array(inputData.length);
         for (let i = 0; i < inputData.length; i++) pcmData[i] = Math.max(-1, Math.min(1, inputData[i])) * 0x7FFF;
-        const base64Data = btoa(String.fromCharCode(...new Uint8Array(pcmData.buffer)));
+        const bytes = new Uint8Array(pcmData.buffer);
+        let binary = '';
+        for (let i = 0; i < bytes.byteLength; i++) {
+          binary += String.fromCharCode(bytes[i]);
+        }
+        const base64Data = btoa(binary);
         clientRef.current?.sendAudio(base64Data);
         
         const sum = inputData.reduce((a, b) => a + Math.abs(b), 0);

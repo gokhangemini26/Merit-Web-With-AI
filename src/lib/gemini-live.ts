@@ -22,8 +22,8 @@ export class GeminiLiveClient {
   }
 
   async connect() {
-    this.session = await this.ai.live.connect({
-      model: "gemini-3.1-flash-live-preview",
+    this.session = await (this.ai as any).live.connect({
+      model: "gemini-2.0-flash-exp",
       config: {
         responseModalities: [Modality.AUDIO],
         speechConfig: {
@@ -122,7 +122,8 @@ export class GeminiLiveClient {
 
   sendText(text: string) {
     if (this.session) {
-      this.session.sendRealtimeInput({ text });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (this.session as any).send(text);
     }
   }
 
@@ -134,9 +135,8 @@ export class GeminiLiveClient {
 
   triggerGreeting() {
     if (this.session) {
-      // Use sendRealtimeInput with text — more reliable in audio streaming sessions.
-      // The system instruction will make the model respond with the welcome greeting.
-      this.session.sendRealtimeInput({ text: "Başla" });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (this.session as any).send("Başla");
     }
   }
 
