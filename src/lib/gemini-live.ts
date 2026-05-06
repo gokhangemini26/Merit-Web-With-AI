@@ -23,7 +23,7 @@ export class GeminiLiveClient {
 
   async connect() {
     this.session = await (this.ai as any).live.connect({
-      model: "gemini-2.0-flash-exp",
+      model: "gemini-3.1-flash-live-preview",
       config: {
         responseModalities: [Modality.AUDIO],
         speechConfig: {
